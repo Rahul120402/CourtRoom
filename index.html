@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Court Case Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --border: #e2e0d8;
+    --border-mid: #c8c5bb;
+    --text-primary: #1a1917;
+    --text-secondary: #6b6860;
+    --text-muted: #9c9a93;
+    --accent: #1a3a5c;
+    --accent-light: #e8edf3;
+    --accent-hover: #142d47;
+    --danger: #c0392b;
+    --success: #166534;
+    --success-bg: #f0fdf4;
+    --warning-bg: #fffbeb;
+    --warning: #92400e;
+    --radius: 10px;
+    --radius-sm: 6px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  header {
+    background: var(--accent);
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  header .logo {
+    width: 36px; height: 36px;
+    background: rgba(255,255,255,0.15);
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+
+  header h1 {
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  header p {
+    color: rgba(255,255,255,0.6);
+    font-size: 12px;
+    margin-top: 1px;
+  }
+
+  .container {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 4rem;
+  }
+
+  .tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 4px;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow);
+  }
+
+  .tab-btn {
+    padding: 10px;
+    border: none;
+    background: transparent;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+
+  .tab-btn.active {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .tab-btn:not(.active):hover {
+    background: var(--bg);
+    color: var(--text-primary);
+  }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    box-shadow: var(--shadow);
+    margin-bottom: 1rem;
+  }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .field {
+    margin-bottom: 1rem;
+  }
+
+  .field:last-child { margin-bottom: 0; }
+
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 5px;
+  }
+
+  label .req { color: var(--danger); margin-left: 2px; }
+
+  label .hint {
+    font-weight: 400;
+    color: var(--text-muted);
+    font-size: 12px;
+    margin-left: 4px;
+  }
+
+  input, textarea, select {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid var(--border-mid);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--text-primary);
+    background: var(--surface);
+    transition: border-color 0.15s, box-shadow 0.15s;
+    appearance: none;
+  }
+
+  input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(26,58,92,0.12);
+  }
+
+  input::placeholder, textarea::placeholder {
+    color: var(--text-muted);
+  }
+
+  textarea { resize: vertical; min-height: 80px; }
+
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b6860' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 36px;
+  }
+
+  .row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .status-toggle {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  .status-opt {
+    position: relative;
+  }
+
+  .status-opt input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0; height: 0;
+  }
+
+  .status-opt label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px;
+    border: 1px solid var(--border-mid);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin: 0;
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .status-opt input[type="radio"]:checked + label {
+    border-color: var(--accent);
+    background: var(--accent-light);
+    color: var(--accent);
+  }
+
+  .status-opt.closed input[type="radio"]:checked + label {
+    border-color: #9ca3af;
+    background: #f9fafb;
+    color: #374151;
+  }
+
+  .next-date-section {
+    display: none;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px dashed var(--border);
+  }
+
+  .next-date-section.visible { display: block; }
+
+  .submit-btn {
+    width: 100%;
+    padding: 12px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-top: 0.25rem;
+    letter-spacing: 0.01em;
+  }
+
+  .submit-btn:hover { background: var(--accent-hover); }
+  .submit-btn:active { transform: scale(0.99); }
+  .submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .submit-btn .spinner {
+    display: none;
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: 0 auto;
+  }
+
+  .submit-btn.loading .btn-text { display: none; }
+  .submit-btn.loading .spinner { display: block; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .toast {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--text-primary);
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 500;
+    max-width: 90vw;
+    text-align: center;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 999;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.success { background: #14532d; }
+  .toast.error { background: #7f1d1d; }
+
+  .field-note {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 1rem 0;
+  }
+
+  .info-banner {
+    background: var(--warning-bg);
+    border: 1px solid #fcd34d;
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-size: 12px;
+    color: var(--warning);
+    margin-bottom: 1rem;
+    line-height: 1.5;
+  }
+
+  .config-note {
+    background: var(--accent-light);
+    border: 1px solid #c7d7ea;
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-size: 12px;
+    color: var(--accent);
+    margin-bottom: 1.25rem;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 480px) {
+    .row-2 { grid-template-columns: 1fr; }
+    .container { padding: 1rem 0.75rem 4rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">⚖️</div>
+  <div>
+    <h1>Court Case Manager</h1>
+    <p>Jaipur District Court — Case Tracking</p>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="config-note" id="configBanner">
+    ⚙️ <strong>Setup required:</strong> Open this file and set <code>APPS_SCRIPT_URL</code> to your deployed Web App URL.
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('register')">Register New Case</button>
+    <button class="tab-btn" onclick="switchTab('update')">Update Existing Case</button>
+  </div>
+
+  <!-- REGISTER PANEL -->
+  <div class="panel active" id="panel-register">
+    <div class="card">
+      <div class="card-title">Case Information</div>
+
+      <div class="field">
+        <label>Case ID <span class="req">*</span></label>
+        <input type="text" id="reg-caseId" placeholder="e.g. JDC-2024-001" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label>Party Name <span class="req">*</span></label>
+        <input type="text" id="reg-name" placeholder="Petitioner vs Respondent">
+      </div>
+
+      <div class="field">
+        <label>Case Description</label>
+        <textarea id="reg-desc" placeholder="Brief description of the case..."></textarea>
+      </div>
+
+      <div class="field">
+        <label>Assigned Lawyer</label>
+        <input type="text" id="reg-lawyer" placeholder="Advocate name">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">First Hearing</div>
+
+      <div class="field">
+        <label>Status <span class="req">*</span></label>
+        <div class="status-toggle">
+          <div class="status-opt">
+            <input type="radio" name="reg-status" id="reg-ongoing" value="Ongoing" checked>
+            <label for="reg-ongoing">🟢 Ongoing</label>
+          </div>
+          <div class="status-opt closed">
+            <input type="radio" name="reg-status" id="reg-closed" value="Closed">
+            <label for="reg-closed">⚪ Closed</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="next-date-section visible" id="reg-next-section">
+        <div class="field">
+          <label>Hearing Outcome <span class="hint">(optional)</span></label>
+          <input type="text" id="reg-outcome" placeholder="e.g. Adjourned, Arguments heard...">
+        </div>
+        <div class="row-2">
+          <div class="field">
+            <label>Next Date <span class="req">*</span></label>
+            <input type="date" id="reg-date">
+          </div>
+          <div class="field">
+            <label>Time</label>
+            <input type="time" id="reg-time" value="10:30">
+          </div>
+        </div>
+        <p class="field-note">A Google Calendar event will be created for this date.</p>
+      </div>
+    </div>
+
+    <button class="submit-btn" id="reg-btn" onclick="submitRegister()">
+      <span class="btn-text">Register Case &amp; Schedule Hearing</span>
+      <div class="spinner"></div>
+    </button>
+  </div>
+
+  <!-- UPDATE PANEL -->
+  <div class="panel" id="panel-update">
+    <div class="card">
+      <div class="card-title">Identify Case</div>
+      <div class="field">
+        <label>Case ID <span class="req">*</span></label>
+        <input type="text" id="upd-caseId" placeholder="Enter existing case ID" autocomplete="off">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Today's Hearing Update</div>
+
+      <div class="field">
+        <label>Today's Outcome <span class="req">*</span></label>
+        <input type="text" id="upd-outcome" placeholder="e.g. Arguments heard, Adjourned...">
+      </div>
+
+      <div class="field">
+        <label>Hearing Date <span class="hint">(today's date)</span></label>
+        <input type="date" id="upd-hearingDate">
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="field">
+        <label>Status after today <span class="req">*</span></label>
+        <div class="status-toggle">
+          <div class="status-opt">
+            <input type="radio" name="upd-status" id="upd-ongoing" value="Ongoing" checked onchange="toggleNextDate('upd', true)">
+            <label for="upd-ongoing">🟢 Ongoing</label>
+          </div>
+          <div class="status-opt closed">
+            <input type="radio" name="upd-status" id="upd-closed" value="Closed" onchange="toggleNextDate('upd', false)">
+            <label for="upd-closed">⚪ Closed</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="next-date-section visible" id="upd-next-section">
+        <div class="row-2">
+          <div class="field">
+            <label>Next Hearing Date <span class="req">*</span></label>
+            <input type="date" id="upd-nextDate">
+          </div>
+          <div class="field">
+            <label>Time</label>
+            <input type="time" id="upd-nextTime" value="10:30">
+          </div>
+        </div>
+        <p class="field-note">Old calendar event will be replaced with the new date.</p>
+      </div>
+    </div>
+
+    <button class="submit-btn" id="upd-btn" onclick="submitUpdate()">
+      <span class="btn-text">Save Update &amp; Reschedule</span>
+      <div class="spinner"></div>
+    </button>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzWS9Hhy1Rf-PZH_03-EzF_fc4VtH2XTSKFLJvDvKVurX4Zkw4PJEJswcJ7nHGOlcNb/exec";
+
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach((b, i) => {
+      b.classList.toggle('active', (i === 0 && tab === 'register') || (i === 1 && tab === 'update'));
+    });
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + tab).classList.add('active');
+  }
+
+  function toggleNextDate(prefix, show) {
+    const sec = document.getElementById(prefix + '-next-section');
+    sec.classList.toggle('visible', show);
+  }
+
+  document.querySelectorAll('input[name="reg-status"]').forEach(r => {
+    r.addEventListener('change', () => toggleNextDate('reg', r.value === 'Ongoing'));
+  });
+
+  function setToday() {
+    const today = new Date().toISOString().split('T')[0];
+    const updHearing = document.getElementById('upd-hearingDate');
+    if (updHearing) updHearing.value = today;
+  }
+  setToday();
+
+  function showToast(msg, type = '') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast ' + type;
+    requestAnimationFrame(() => t.classList.add('show'));
+    setTimeout(() => t.classList.remove('show'), 4000);
+  }
+
+  function setLoading(btnId, loading) {
+    const btn = document.getElementById(btnId);
+    btn.disabled = loading;
+    btn.classList.toggle('loading', loading);
+  }
+
+  function validate(fields) {
+    for (const [id, label] of fields) {
+      const el = document.getElementById(id);
+      if (!el || !el.value.trim()) {
+        el && el.focus();
+        showToast(label + ' is required', 'error');
+        return false;
+      }
+    }
+    return true;
+  }
+
+  async function postToScript(payload) {
+    if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === "YOUR_APPS_SCRIPT_WEB_APP_URL_HERE") {
+      throw new Error("Apps Script URL not configured. Please update APPS_SCRIPT_URL in this file.");
+    }
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+    const text = await res.text();
+    let data;
+    try { data = JSON.parse(text); } catch { data = { status: 'ok' }; }
+    if (data.error) throw new Error(data.error);
+    return data;
+  }
+
+  async function submitRegister() {
+    const status = document.querySelector('input[name="reg-status"]:checked').value;
+    const isOngoing = status === 'Ongoing';
+
+    const required = [['reg-caseId', 'Case ID'], ['reg-name', 'Party name']];
+    if (isOngoing) required.push(['reg-date', 'Next hearing date']);
+    if (!validate(required)) return;
+
+    setLoading('reg-btn', true);
+    try {
+      await postToScript({
+        action: 'register',
+        caseId: document.getElementById('reg-caseId').value.trim(),
+        name: document.getElementById('reg-name').value.trim(),
+        description: document.getElementById('reg-desc').value.trim(),
+        lawyer: document.getElementById('reg-lawyer').value.trim(),
+        outcome: document.getElementById('reg-outcome').value.trim(),
+        status: status,
+        nextDate: document.getElementById('reg-date').value,
+        nextTime: document.getElementById('reg-time').value
+      });
+      showToast('Case registered successfully! Calendar event created.', 'success');
+      document.querySelectorAll('#panel-register input, #panel-register textarea').forEach(el => {
+        if (el.type !== 'radio') el.value = '';
+      });
+      document.getElementById('reg-ongoing').checked = true;
+      toggleNextDate('reg', true);
+    } catch (err) {
+      showToast(err.message || 'Something went wrong. Try again.', 'error');
+    }
+    setLoading('reg-btn', false);
+  }
+
+  async function submitUpdate() {
+    const status = document.querySelector('input[name="upd-status"]:checked').value;
+    const isOngoing = status === 'Ongoing';
+
+    const required = [['upd-caseId', 'Case ID'], ['upd-outcome', "Today's outcome"]];
+    if (isOngoing) required.push(['upd-nextDate', 'Next hearing date']);
+    if (!validate(required)) return;
+
+    setLoading('upd-btn', true);
+    try {
+      await postToScript({
+        action: 'update',
+        caseId: document.getElementById('upd-caseId').value.trim(),
+        outcome: document.getElementById('upd-outcome').value.trim(),
+        hearingDate: document.getElementById('upd-hearingDate').value,
+        status: status,
+        nextDate: document.getElementById('upd-nextDate').value,
+        nextTime: document.getElementById('upd-nextTime').value
+      });
+      showToast('Case updated! Calendar rescheduled.', 'success');
+      document.querySelectorAll('#panel-update input').forEach(el => {
+        if (el.type !== 'radio') el.value = '';
+      });
+      document.getElementById('upd-ongoing').checked = true;
+      toggleNextDate('upd', true);
+      setToday();
+    } catch (err) {
+      showToast(err.message || 'Something went wrong. Try again.', 'error');
+    }
+    setLoading('upd-btn', false);
+  }
+
+  if (APPS_SCRIPT_URL && APPS_SCRIPT_URL !== "YOUR_APPS_SCRIPT_WEB_APP_URL_HERE") {
+    document.getElementById('configBanner').style.display = 'none';
+  }
+</script>
+</body>
+</html>
