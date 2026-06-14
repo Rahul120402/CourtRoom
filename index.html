@@ -3,638 +3,1153 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Court Case Manager</title>
+<title>LexTrack — Court Case Manager</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --slate:#1C2B3A;--slate-mid:#2a3f52;--slate-light:#3d5468;
+  --parch:#F2EDE4;--parch-mid:#E8E0D4;--parch-dark:#D4C9B8;
+  --brass:#C9A84C;--brass-light:#E8D48A;--brass-dark:#9A7A2E;
+  --ink:#1a1a1a;--ink-mid:#3d4f5f;--ink-soft:#6b7e8f;--ink-muted:#a0adb8;
+  --surface:#ffffff;--surface-alt:#FAFAF7;
+  --rule:#E0DAD0;--rule-mid:#C8C0B4;
+  --red:#C0392B;--red-bg:#fdf2f1;--red-light:#fef2f2;
+  --green:#1a6b3a;--green-bg:#f0fdf4;
+  --amber:#92400e;--amber-bg:#fffbeb;
+  --r:10px;--r-sm:6px;--r-lg:14px;
+  --sh-sm:0 1px 3px rgba(0,0,0,0.07),0 1px 2px rgba(0,0,0,0.04);
+  --sh:0 4px 16px rgba(0,0,0,0.08),0 1px 4px rgba(0,0,0,0.05);
+  --sh-lg:0 12px 40px rgba(0,0,0,0.13),0 4px 12px rgba(0,0,0,0.06);
+}
+body{font-family:'Inter',sans-serif;background:var(--parch);color:var(--ink);min-height:100vh;overflow-x:hidden;}
 
-  :root {
-    --bg: #f5f4f0;
-    --surface: #ffffff;
-    --border: #e2e0d8;
-    --border-mid: #c8c5bb;
-    --text-primary: #1a1917;
-    --text-secondary: #6b6860;
-    --text-muted: #9c9a93;
-    --accent: #1a3a5c;
-    --accent-light: #e8edf3;
-    --accent-hover: #142d47;
-    --danger: #c0392b;
-    --success: #166534;
-    --success-bg: #f0fdf4;
-    --warning-bg: #fffbeb;
-    --warning: #92400e;
-    --radius: 10px;
-    --radius-sm: 6px;
-    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-  }
+/* ── PAGE TRANSITIONS ── */
+.screen{display:none;min-height:100vh;opacity:0;transform:translateY(8px);transition:opacity 0.25s ease,transform 0.25s ease;}
+.screen.active{display:block;opacity:1;transform:translateY(0);}
+.screen.slide-in{animation:slideIn 0.3s ease forwards;}
+@keyframes slideIn{from{opacity:0;transform:translateX(24px);}to{opacity:1;transform:translateX(0);}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(1.35);}}
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes shimmer{0%{background-position:-200% 0;}100%{background-position:200% 0;}}
+@keyframes countUp{from{opacity:0;transform:scale(0.7);}to{opacity:1;transform:scale(1);}}
+@keyframes barGrow{from{width:0!important;}to{}}
+@keyframes bounceIn{0%{transform:scale(0.3);opacity:0;}50%{transform:scale(1.05);}70%{transform:scale(0.95);}100%{transform:scale(1);opacity:1;}}
+@keyframes cardFadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+@keyframes shake{0%,100%{transform:translateX(0);}20%{transform:translateX(-6px);}40%{transform:translateX(6px);}60%{transform:translateX(-4px);}80%{transform:translateX(4px);}}
+@keyframes ripple{to{transform:scale(4);opacity:0;}}
 
-  body {
-    font-family: 'Inter', sans-serif;
-    background: var(--bg);
-    color: var(--text-primary);
-    min-height: 100vh;
-    padding: 0;
-  }
+/* ── SKELETON LOADING ── */
+.skel{background:linear-gradient(90deg,var(--parch-mid) 25%,var(--parch-dark) 50%,var(--parch-mid) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:var(--r-sm);}
 
-  header {
-    background: var(--accent);
-    padding: 1rem 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
+/* ── HOME ── */
+.home-header{background:var(--slate);padding:0 1.25rem;height:60px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--brass);}
+.brand{display:flex;align-items:baseline;gap:2px;}
+.brand-name{font-family:'DM Serif Display',serif;font-size:24px;color:#fff;letter-spacing:-0.01em;}
+.brand-name em{color:var(--brass-light);font-style:normal;}
+.brand-tag{font-size:10px;color:rgba(255,255,255,0.38);letter-spacing:0.09em;text-transform:uppercase;margin-left:8px;align-self:center;}
+.header-date{font-size:12px;color:rgba(255,255,255,0.42);}
 
-  header .logo {
-    width: 36px; height: 36px;
-    background: rgba(255,255,255,0.15);
-    border-radius: var(--radius-sm);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px;
-  }
+.hero{background:linear-gradient(155deg,var(--slate) 0%,var(--slate-mid) 55%,#2d4a61 100%);padding:2rem 1.25rem 2.5rem;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.025'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E");}
+.hero-eyebrow{font-size:11px;color:var(--brass-light);letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;opacity:.85;animation:fadeUp .5s .1s both;}
+.hero-title{font-family:'DM Serif Display',serif;font-size:clamp(24px,5vw,36px);color:#fff;line-height:1.18;margin-bottom:6px;animation:fadeUp .5s .2s both;}
+.hero-sub{font-size:13px;color:rgba(255,255,255,.5);line-height:1.6;max-width:380px;animation:fadeUp .5s .3s both;}
 
-  header h1 {
-    color: #fff;
-    font-size: 16px;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-  }
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--brass-dark);border-top:1px solid var(--brass-dark);}
+.stat-item{background:var(--slate-mid);padding:13px 10px;text-align:center;cursor:default;}
+.stat-num{font-family:'DM Serif Display',serif;font-size:26px;color:#fff;line-height:1;animation:countUp .5s .4s both;}
+.stat-lbl{font-size:9px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.07em;margin-top:3px;}
+.stat-item.hi .stat-num{color:var(--brass-light);}
+.stat-item.danger .stat-num{color:#f87171;}
 
-  header p {
-    color: rgba(255,255,255,0.6);
-    font-size: 12px;
-    margin-top: 1px;
-  }
+.home-body{padding:1.25rem;}
 
-  .container {
-    max-width: 640px;
-    margin: 0 auto;
-    padding: 1.5rem 1rem 4rem;
-  }
+.sec-label{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:600;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.875rem;}
+.sec-label::after{content:'';flex:1;height:1px;background:var(--rule);}
+.live-dot{width:7px;height:7px;border-radius:50%;background:#22c55e;animation:pulse 2s infinite;flex-shrink:0;}
 
-  .tabs {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 4px;
-    margin-bottom: 1.5rem;
-    box-shadow: var(--shadow);
-  }
+.docket-list{display:flex;flex-direction:column;gap:8px;margin-bottom:1.25rem;}
+.docket-card{background:var(--surface);border:1px solid var(--rule);border-radius:var(--r);padding:12px 14px;display:flex;align-items:center;gap:12px;box-shadow:var(--sh-sm);cursor:pointer;transition:transform .18s,box-shadow .18s,border-color .18s;position:relative;overflow:hidden;animation:cardFadeUp .4s both;}
+.docket-card::after{content:'';position:absolute;inset:0;background:rgba(201,168,76,.06);opacity:0;transition:opacity .15s;}
+.docket-card:hover{transform:translateY(-2px);box-shadow:var(--sh);border-color:var(--brass);}
+.docket-card:hover::after{opacity:1;}
+.docket-card:active{transform:translateY(0);}
+.docket-card.overdue-card{border-left:3px solid var(--red);}
+.docket-date-block{min-width:42px;text-align:center;background:var(--parch);border-radius:var(--r-sm);padding:6px 8px;border:1px solid var(--parch-dark);flex-shrink:0;}
+.docket-day{font-family:'DM Serif Display',serif;font-size:20px;color:var(--slate);line-height:1;}
+.docket-mon{font-size:9px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.06em;}
+.docket-info{flex:1;min-width:0;}
+.docket-id{font-size:11px;font-weight:600;color:var(--brass-dark);margin-bottom:2px;}
+.docket-title{font-size:13px;font-weight:500;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.docket-meta{font-size:11px;color:var(--ink-muted);margin-top:2px;}
+.docket-arrow{color:var(--ink-muted);font-size:16px;flex-shrink:0;transition:transform .15s;}
+.docket-card:hover .docket-arrow{transform:translateX(3px);color:var(--brass-dark);}
+.docket-empty{text-align:center;padding:2rem;color:var(--ink-muted);font-size:13px;background:var(--surface);border:1px dashed var(--rule);border-radius:var(--r);}
 
-  .tab-btn {
-    padding: 10px;
-    border: none;
-    background: transparent;
-    border-radius: var(--radius-sm);
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: all 0.15s;
-    font-family: inherit;
-  }
+.prio-badge{padding:3px 8px;border-radius:100px;font-size:10px;font-weight:600;flex-shrink:0;}
+.prio-badge.High{background:var(--red-light);color:#991b1b;}
+.prio-badge.Medium{background:var(--amber-bg);color:var(--amber);}
+.prio-badge.Low{background:var(--green-bg);color:var(--green);}
 
-  .tab-btn.active {
-    background: var(--accent);
-    color: #fff;
-  }
+.action-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem;}
+.action-btn{background:var(--surface);border:1px solid var(--rule);border-radius:var(--r-lg);padding:16px 14px;text-align:left;cursor:pointer;transition:transform .18s,box-shadow .18s,border-color .18s;box-shadow:var(--sh-sm);font-family:inherit;display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden;}
+.action-btn::after{content:'';position:absolute;inset:0;opacity:0;transition:opacity .15s;}
+.action-btn:hover{transform:translateY(-2px);box-shadow:var(--sh);}
+.action-btn:active{transform:scale(.98);}
+.action-btn.primary{background:var(--slate);border-color:var(--slate);}
+.action-btn.primary:hover{background:var(--slate-mid);border-color:var(--slate-mid);}
+.action-btn.danger-btn{background:#fff;border-color:#fca5a5;}
+.action-btn.danger-btn:hover{border-color:var(--red);}
+.action-icon{width:36px;height:36px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;font-size:18px;}
+.action-btn.primary .action-icon{background:rgba(255,255,255,.12);}
+.action-btn:not(.primary) .action-icon{background:var(--parch);}
+.action-btn.danger-btn .action-icon{background:#fef2f2;}
+.action-btn-title{font-size:14px;font-weight:600;}
+.action-btn.primary .action-btn-title{color:#fff;}
+.action-btn:not(.primary) .action-btn-title{color:var(--ink);}
+.action-btn-desc{font-size:11px;line-height:1.4;}
+.action-btn.primary .action-btn-desc{color:rgba(255,255,255,.55);}
+.action-btn:not(.primary) .action-btn-desc{color:var(--ink-soft);}
+.action-btn.full{grid-column:span 2;flex-direction:row;align-items:center;gap:14px;padding:14px;}
+.action-btn.full .action-icon{flex-shrink:0;}
 
-  .tab-btn:not(.active):hover {
-    background: var(--bg);
-    color: var(--text-primary);
-  }
+/* Ripple effect */
+.ripple-wrap{position:relative;overflow:hidden;}
+.ripple-wrap .ripple-el{position:absolute;border-radius:50%;background:rgba(255,255,255,.3);transform:scale(0);animation:ripple .5s linear;pointer-events:none;}
 
-  .panel { display: none; }
-  .panel.active { display: block; }
+/* ── INNER SCREENS ── */
+.inner-header{background:var(--slate);padding:0 1rem;height:56px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;border-bottom:2px solid var(--brass);}
+.back-btn{width:36px;height:36px;border-radius:var(--r-sm);background:rgba(255,255,255,.1);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s,transform .15s;flex-shrink:0;}
+.back-btn:hover{background:rgba(255,255,255,.2);}
+.back-btn:active{transform:scale(.93);}
+.back-btn svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2.2;}
+.inner-title{font-family:'DM Serif Display',serif;font-size:18px;color:#fff;flex:1;}
+.inner-subtitle{font-size:11px;color:rgba(255,255,255,.4);}
 
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1.25rem;
-    box-shadow: var(--shadow);
-    margin-bottom: 1rem;
-  }
+.progress-bar-wrap{background:var(--slate-mid);padding:11px 1.25rem;display:flex;align-items:center;overflow-x:auto;}
+.step{display:flex;align-items:center;gap:5px;flex-shrink:0;}
+.step-num{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;background:rgba(255,255,255,.15);color:rgba(255,255,255,.45);transition:all .25s;}
+.step.done .step-num{background:var(--brass);color:var(--slate);}
+.step.active .step-num{background:#fff;color:var(--slate);}
+.step-lbl{font-size:11px;color:rgba(255,255,255,.38);white-space:nowrap;transition:color .25s;}
+.step.active .step-lbl{color:rgba(255,255,255,.9);}
+.step.done .step-lbl{color:rgba(255,255,255,.55);}
+.step-line{flex:1;height:1px;background:rgba(255,255,255,.15);margin:0 6px;min-width:18px;}
 
-  .card-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    margin-bottom: 1rem;
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid var(--border);
-  }
+.form-container{max-width:680px;margin:0 auto;padding:1.25rem 1rem 6rem;}
 
-  .field {
-    margin-bottom: 1rem;
-  }
+/* FORM CARDS */
+.fc{background:var(--surface);border:1px solid var(--rule);border-radius:var(--r-lg);margin-bottom:1rem;overflow:hidden;box-shadow:var(--sh-sm);animation:cardFadeUp .35s both;}
+.fc:nth-child(1){animation-delay:.05s;}
+.fc:nth-child(2){animation-delay:.1s;}
+.fc:nth-child(3){animation-delay:.15s;}
+.fc:nth-child(4){animation-delay:.2s;}
+.fc:nth-child(5){animation-delay:.25s;}
+.fch{padding:11px 16px;background:var(--surface-alt);border-bottom:1px solid var(--rule);display:flex;align-items:center;gap:10px;}
+.fch-icon{width:28px;height:28px;border-radius:var(--r-sm);background:var(--parch);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.fch-title{font-size:12px;font-weight:600;color:var(--ink-mid);}
+.fch-sub{font-size:11px;color:var(--ink-muted);margin-top:1px;}
+.fcb{padding:1.25rem;}
 
-  .field:last-child { margin-bottom: 0; }
+.field{margin-bottom:1rem;}.field:last-child{margin-bottom:0;}
+.field-row{display:grid;gap:12px;}
+.c2{grid-template-columns:1fr 1fr;}.c3{grid-template-columns:1fr 1fr 1fr;}
 
-  label {
-    display: block;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text-primary);
-    margin-bottom: 5px;
-  }
+label.std{display:block;font-size:12px;font-weight:600;color:var(--ink-mid);margin-bottom:5px;letter-spacing:.01em;}
+label .req{color:var(--red);margin-left:2px;}
+label .opt{color:var(--ink-muted);font-weight:400;font-size:11px;margin-left:4px;}
 
-  label .req { color: var(--danger); margin-left: 2px; }
+input[type=text],input[type=date],input[type=time],input[type=tel],
+input[type=number],select,textarea{
+  width:100%;padding:10px 12px;border:1.5px solid var(--rule-mid);border-radius:var(--r-sm);
+  font-size:13.5px;font-family:inherit;color:var(--ink);background:var(--surface);
+  transition:border-color .18s,box-shadow .18s,transform .1s;appearance:none;
+}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--brass-dark);box-shadow:0 0 0 3px rgba(201,168,76,.15);transform:scale(1.005);}
+input.error{border-color:var(--red);animation:shake .3s ease;}
+input::placeholder,textarea::placeholder{color:var(--ink-muted);}
+textarea{resize:vertical;min-height:72px;}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7e8f' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:34px;cursor:pointer;}
+.field-note{font-size:11px;color:var(--ink-muted);margin-top:5px;display:flex;align-items:center;gap:5px;}
+.field-note svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;flex-shrink:0;}
 
-  label .hint {
-    font-weight: 400;
-    color: var(--text-muted);
-    font-size: 12px;
-    margin-left: 4px;
-  }
+/* Priority */
+.pg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+.po{position:relative;}
+.po input{position:absolute;opacity:0;width:0;height:0;}
+.po label{display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 6px;border:1.5px solid var(--rule-mid);border-radius:var(--r-sm);cursor:pointer;font-size:12px;font-weight:500;color:var(--ink-soft);margin:0;transition:all .15s;}
+.po label:hover{border-color:var(--rule-mid);background:var(--parch);}
+.po.low input:checked+label{border-color:#16a34a;background:var(--green-bg);color:var(--green);}
+.po.med input:checked+label{border-color:#d97706;background:var(--amber-bg);color:var(--amber);}
+.po.high input:checked+label{border-color:#dc2626;background:var(--red-light);color:#991b1b;}
 
-  input, textarea, select {
-    width: 100%;
-    padding: 9px 12px;
-    border: 1px solid var(--border-mid);
-    border-radius: var(--radius-sm);
-    font-size: 14px;
-    font-family: inherit;
-    color: var(--text-primary);
-    background: var(--surface);
-    transition: border-color 0.15s, box-shadow 0.15s;
-    appearance: none;
-  }
+/* Status */
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.so{position:relative;}
+.so input{position:absolute;opacity:0;width:0;height:0;}
+.so label{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border:1.5px solid var(--rule-mid);border-radius:var(--r);cursor:pointer;font-size:13px;font-weight:500;color:var(--ink-soft);margin:0;transition:all .15s;}
+.so label:hover{background:var(--parch);}
+.so label svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;}
+.so.ongoing input:checked+label{border-color:#16a34a;background:var(--green-bg);color:var(--green);}
+.so.closed input:checked+label{border-color:var(--rule-mid);background:var(--surface-alt);color:var(--ink-mid);}
 
-  input:focus, textarea:focus, select:focus {
-    outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(26,58,92,0.12);
-  }
+/* Collapse */
+.nhb{overflow:hidden;max-height:0;transition:max-height .35s ease,opacity .25s;opacity:0;}
+.nhb.open{max-height:400px;opacity:1;}
+.nhb .inner{margin-top:1rem;padding-top:1rem;border-top:1px dashed var(--rule);}
 
-  input::placeholder, textarea::placeholder {
-    color: var(--text-muted);
-  }
+/* Docs */
+.dc{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.di{display:flex;align-items:center;gap:8px;padding:9px 11px;border:1.5px solid var(--rule);border-radius:var(--r-sm);cursor:pointer;transition:all .15s;background:var(--surface);}
+.di:hover{border-color:var(--brass);background:var(--parch);}
+.di input[type=checkbox]{width:14px;height:14px;accent-color:var(--slate);cursor:pointer;flex-shrink:0;}
+.di-lbl{font-size:12px;color:var(--ink-mid);user-select:none;transition:color .12s;}
+.di input:checked~.di-lbl{color:var(--slate);font-weight:500;}
 
-  textarea { resize: vertical; min-height: 80px; }
+.divider{height:1px;background:var(--rule);margin:1rem 0;}
 
-  select {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b6860' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-    padding-right: 36px;
-  }
+/* Submit bar */
+.submit-zone{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--rule);padding:12px 1rem 20px;box-shadow:0 -4px 20px rgba(0,0,0,0.07);z-index:100;}
+.submit-zone-inner{max-width:680px;margin:0 auto;}
+.btn-primary{width:100%;padding:14px;background:var(--slate);color:#fff;border:none;border-radius:var(--r);font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;transition:background .15s,transform .1s,box-shadow .15s;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:.01em;box-shadow:0 2px 8px rgba(28,43,58,.25);}
+.btn-primary:hover{background:var(--slate-mid);box-shadow:0 4px 16px rgba(28,43,58,.3);}
+.btn-primary:active{transform:scale(.98);}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none;}
+.btn-primary svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;}
+.btn-spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+.btn-primary.loading .btn-txt{display:none;}.btn-primary.loading .btn-spin{display:block;}
 
-  .row-2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
+/* ── CASES LIST ── */
+#caseSearchInput{width:100%;padding:11px 14px 11px 38px;border:1.5px solid var(--rule-mid);border-radius:var(--r);font-size:13.5px;font-family:inherit;background:var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%236b7e8f' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") no-repeat 12px center;box-shadow:var(--sh-sm);}
+#caseSearchInput:focus{outline:none;border-color:var(--brass-dark);box-shadow:0 0 0 3px rgba(201,168,76,.15);}
 
-  .status-toggle {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
-  }
+.case-list-card{background:var(--surface);border:1px solid var(--rule);border-radius:var(--r);padding:13px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;box-shadow:var(--sh-sm);transition:transform .15s,box-shadow .15s,border-color .15s;animation:cardFadeUp .35s both;}
+.case-list-card:hover{transform:translateY(-2px);box-shadow:var(--sh);border-color:var(--brass);}
+.case-list-card:active{transform:scale(.99);}
+.case-list-avatar{width:40px;height:40px;border-radius:var(--r-sm);background:var(--slate);color:var(--brass-light);display:flex;align-items:center;justify-content:center;font-family:'DM Serif Display',serif;font-size:16px;flex-shrink:0;}
+.case-list-avatar.closed{background:var(--parch-dark);color:var(--ink-soft);}
+.case-list-info{flex:1;min-width:0;}
+.case-list-id{font-size:11px;font-weight:700;color:var(--brass-dark);margin-bottom:2px;}
+.case-list-client{font-size:14px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.case-list-title{font-size:12px;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;}
+.case-list-meta{display:flex;align-items:center;gap:6px;margin-top:4px;}
+.case-list-arrow{color:var(--ink-muted);font-size:18px;flex-shrink:0;transition:transform .15s;}
+.case-list-card:hover .case-list-arrow{transform:translateX(3px);color:var(--brass-dark);}
+.status-pill{font-size:10px;font-weight:600;padding:2px 8px;border-radius:100px;}
+.status-pill.Ongoing{background:var(--green-bg);color:var(--green);}
+.status-pill.Closed{background:var(--parch-dark);color:var(--ink-soft);}
 
-  .status-opt {
-    position: relative;
-  }
+/* ── CASE DETAIL ── */
+.cd-hero{background:linear-gradient(135deg,var(--slate) 0%,var(--slate-mid) 100%);padding:1.5rem 1.25rem;border-radius:var(--r-lg);margin-bottom:1rem;position:relative;overflow:hidden;animation:cardFadeUp .35s both;}
+.cd-hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.025'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E");}
+.cd-hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;position:relative;}
+.cd-hero-id{font-size:11px;color:var(--brass-light);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+.cd-hero-title{font-family:'DM Serif Display',serif;font-size:20px;color:#fff;line-height:1.25;margin-bottom:8px;}
+.cd-hero-tags{display:flex;gap:6px;flex-wrap:wrap;}
+.cd-tag{font-size:10px;font-weight:600;padding:3px 9px;border-radius:100px;background:rgba(255,255,255,.12);color:rgba(255,255,255,.85);}
 
-  .status-opt input[type="radio"] {
-    position: absolute;
-    opacity: 0;
-    width: 0; height: 0;
-  }
+.cd-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem;}
+.cd-info-card{background:var(--surface);border:1px solid var(--rule);border-radius:var(--r);padding:12px 14px;box-shadow:var(--sh-sm);}
+.cd-info-lbl{font-size:10px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;}
+.cd-info-val{font-size:13px;font-weight:600;color:var(--ink);}
+.cd-info-card.full{grid-column:span 2;}
 
-  .status-opt label {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    padding: 9px;
-    border: 1px solid var(--border-mid);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text-secondary);
-    margin: 0;
-    transition: all 0.15s;
-    user-select: none;
-  }
+.cd-docs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1rem;}
+.cd-doc-tag{font-size:11px;font-weight:500;padding:5px 10px;border-radius:100px;background:var(--green-bg);color:var(--green);display:flex;align-items:center;gap:5px;}
+.cd-doc-tag svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.5;}
 
-  .status-opt input[type="radio"]:checked + label {
-    border-color: var(--accent);
-    background: var(--accent-light);
-    color: var(--accent);
-  }
+/* Timeline */
+.cd-timeline{position:relative;padding-left:24px;}
+.cd-timeline::before{content:'';position:absolute;left:7px;top:6px;bottom:6px;width:2px;background:var(--rule);}
+.cd-timeline-item{position:relative;padding-bottom:18px;animation:cardFadeUp .35s both;}
+.cd-timeline-item:last-child{padding-bottom:0;}
+.cd-timeline-dot{position:absolute;left:-24px;top:4px;width:16px;height:16px;border-radius:50%;background:var(--surface);border:3px solid var(--brass-dark);}
+.cd-timeline-item:first-child .cd-timeline-dot{background:var(--brass-dark);border-color:var(--brass-dark);box-shadow:0 0 0 4px rgba(201,168,76,.15);}
+.cd-timeline-card{background:var(--surface);border:1px solid var(--rule);border-radius:var(--r);padding:12px 14px;box-shadow:var(--sh-sm);}
+.cd-timeline-date{font-size:11px;font-weight:700;color:var(--brass-dark);margin-bottom:4px;}
+.cd-timeline-stage{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:100px;background:var(--navy-light,#eef2f7);color:var(--slate);margin-bottom:6px;}
+.cd-timeline-outcome{font-size:13px;color:var(--ink);font-weight:500;line-height:1.4;}
+.cd-timeline-meta{font-size:11px;color:var(--ink-muted);margin-top:6px;display:flex;flex-direction:column;gap:2px;}
+.cd-timeline-next{font-size:11px;color:var(--ink-soft);margin-top:6px;padding-top:6px;border-top:1px dashed var(--rule);display:flex;align-items:center;gap:5px;}
+.cd-timeline-next svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;}
 
-  .status-opt.closed input[type="radio"]:checked + label {
-    border-color: #9ca3af;
-    background: #f9fafb;
-    color: #374151;
-  }
+.cd-update-btn{width:100%;padding:13px;background:var(--slate);color:#fff;border:none;border-radius:var(--r);font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:1rem;margin-bottom:1.5rem;transition:background .15s,transform .1s;box-shadow:0 2px 8px rgba(28,43,58,.25);}
+.cd-update-btn:hover{background:var(--slate-mid);}
+.cd-update-btn:active{transform:scale(.98);}
+.cd-update-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;}
 
-  .next-date-section {
-    display: none;
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px dashed var(--border);
-  }
+/* ── ANALYTICS ── */
+.an-hero{background:linear-gradient(135deg,var(--slate) 0%,var(--slate-mid) 100%);padding:1.5rem 1.25rem;border-bottom:2px solid var(--brass);}
+.an-hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+.an-hero-title{font-family:'DM Serif Display',serif;font-size:22px;color:#fff;margin-bottom:3px;}
+.an-hero-sub{font-size:12px;color:rgba(255,255,255,.45);}
+.refresh-btn{display:flex;align-items:center;gap:6px;padding:7px 12px;border:1px solid rgba(255,255,255,.2);border-radius:var(--r-sm);background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s;flex-shrink:0;}
+.refresh-btn:hover{background:rgba(255,255,255,.15);color:#fff;}
+.refresh-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;}
+.refresh-btn.spinning svg{animation:spin .7s linear infinite;}
 
-  .next-date-section.visible { display: block; }
+.an-body{max-width:720px;margin:0 auto;padding:1.25rem 1rem 5rem;}
 
-  .submit-btn {
-    width: 100%;
-    padding: 12px;
-    background: var(--accent);
-    color: #fff;
-    border: none;
-    border-radius: var(--radius);
-    font-size: 14px;
-    font-weight: 600;
-    font-family: inherit;
-    cursor: pointer;
-    transition: all 0.15s;
-    margin-top: 0.25rem;
-    letter-spacing: 0.01em;
-  }
+.stat-g4{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:1rem;}
+.stat-card{background:var(--surface);border:1px solid var(--rule);border-radius:var(--r-lg);padding:1rem;box-shadow:var(--sh-sm);transition:transform .18s,box-shadow .18s;animation:cardFadeUp .4s both;}
+.stat-card:hover{transform:translateY(-2px);box-shadow:var(--sh);}
+.stat-card-val{font-family:'DM Serif Display',serif;font-size:30px;color:var(--slate);line-height:1;animation:countUp .4s .2s both;}
+.stat-card-lbl{font-size:11px;color:var(--ink-soft);margin-top:4px;text-transform:uppercase;letter-spacing:.05em;}
+.stat-card.warn .stat-card-val{color:var(--amber);}
+.stat-card.ok .stat-card-val{color:var(--green);}
+.stat-card.danger .stat-card-val{color:var(--red);}
+.stat-card.brass .stat-card-val{color:var(--brass-dark);}
 
-  .submit-btn:hover { background: var(--accent-hover); }
-  .submit-btn:active { transform: scale(0.99); }
-  .submit-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-  }
+.an-sec{margin-bottom:1.5rem;}
+.an-sec-title{font-family:'DM Serif Display',serif;font-size:17px;color:var(--slate);margin-bottom:.75rem;display:flex;align-items:center;gap:10px;}
+.an-sec-title::after{content:'';flex:1;height:1px;background:var(--rule);}
+.an-sec-badge{font-size:11px;font-weight:600;padding:2px 8px;border-radius:100px;background:var(--red-bg);color:var(--red);font-family:'Inter',sans-serif;}
 
-  .submit-btn .spinner {
-    display: none;
-    width: 16px; height: 16px;
-    border: 2px solid rgba(255,255,255,0.4);
-    border-top-color: #fff;
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-    margin: 0 auto;
-  }
+/* OVERDUE */
+.overdue-banner{background:linear-gradient(135deg,#7f1d1d,#991b1b);border-radius:var(--r-lg);padding:1rem 1.25rem;margin-bottom:1rem;display:flex;align-items:center;gap:14px;box-shadow:0 4px 20px rgba(192,57,43,.25);animation:bounceIn .4s .1s both;}
+.overdue-icon{font-size:28px;flex-shrink:0;}
+.overdue-banner-title{font-size:15px;font-weight:600;color:#fff;}
+.overdue-banner-sub{font-size:12px;color:rgba(255,255,255,.65);margin-top:2px;}
 
-  .submit-btn.loading .btn-text { display: none; }
-  .submit-btn.loading .spinner { display: block; }
+.overdue-card{background:var(--surface);border:1px solid #fca5a5;border-left:4px solid var(--red);border-radius:var(--r);padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .18s;box-shadow:var(--sh-sm);animation:cardFadeUp .35s both;}
+.overdue-card:hover{transform:translateX(4px);box-shadow:var(--sh);border-color:var(--red);}
+.overdue-card:active{transform:scale(.99);}
+.overdue-date-block{min-width:46px;text-align:center;background:var(--red-bg);border:1px solid #fca5a5;border-radius:var(--r-sm);padding:6px 8px;flex-shrink:0;}
+.overdue-date-day{font-family:'DM Serif Display',serif;font-size:20px;color:var(--red);line-height:1;}
+.overdue-date-mon{font-size:9px;color:var(--red);text-transform:uppercase;letter-spacing:.06em;opacity:.7;}
+.overdue-info{flex:1;min-width:0;}
+.overdue-case-id{font-size:11px;font-weight:700;color:var(--red);margin-bottom:2px;}
+.overdue-title{font-size:13px;font-weight:500;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.overdue-meta{font-size:11px;color:var(--ink-muted);margin-top:2px;}
+.overdue-days{background:var(--red-bg);color:var(--red);font-size:11px;font-weight:700;padding:4px 9px;border-radius:100px;flex-shrink:0;white-space:nowrap;}
+.overdue-arrow{color:#fca5a5;font-size:16px;flex-shrink:0;transition:transform .15s;}
+.overdue-card:hover .overdue-arrow{transform:translateX(4px);color:var(--red);}
 
-  @keyframes spin { to { transform: rotate(360deg); } }
+/* Priority rows */
+.prio-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.prio-card{background:var(--surface);border:1px solid var(--rule);border-radius:var(--r-lg);padding:1rem;text-align:center;box-shadow:var(--sh-sm);transition:transform .18s;animation:cardFadeUp .4s both;}
+.prio-card:hover{transform:translateY(-2px);}
+.prio-card.high{border-top:3px solid #ef4444;}
+.prio-card.med{border-top:3px solid #f59e0b;}
+.prio-card.low{border-top:3px solid #22c55e;}
+.prio-val{font-family:'DM Serif Display',serif;font-size:28px;color:var(--slate);animation:countUp .4s .3s both;}
+.prio-lbl{font-size:11px;color:var(--ink-soft);margin-top:3px;}
 
-  .toast {
-    position: fixed;
-    bottom: 1.5rem;
-    left: 50%;
-    transform: translateX(-50%) translateY(80px);
-    background: var(--text-primary);
-    color: #fff;
-    padding: 12px 20px;
-    border-radius: var(--radius);
-    font-size: 13px;
-    font-weight: 500;
-    max-width: 90vw;
-    text-align: center;
-    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    z-index: 999;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-  }
+/* Charts */
+.chart-2col{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem;}
+.chart-card{background:var(--surface);border:1px solid var(--rule);border-radius:var(--r-lg);padding:1rem;box-shadow:var(--sh-sm);}
+.chart-title{font-size:11px;font-weight:600;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;}
+.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.bar-lbl{font-size:11px;color:var(--ink-mid);min-width:85px;max-width:85px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.bar-track{flex:1;height:8px;background:var(--parch);border-radius:100px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:100px;background:var(--slate);animation:barGrow .7s ease both;}
+.bar-fill.brass{background:linear-gradient(90deg,var(--brass-dark),var(--brass));}
+.bar-cnt{font-size:11px;color:var(--ink-soft);min-width:14px;text-align:right;font-weight:600;}
 
-  .toast.show { transform: translateX(-50%) translateY(0); }
-  .toast.success { background: #14532d; }
-  .toast.error { background: #7f1d1d; }
+/* Tables */
+.an-table{background:var(--surface);border:1px solid var(--rule);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--sh-sm);}
+.an-th{display:grid;padding:9px 14px;background:var(--surface-alt);border-bottom:1px solid var(--rule);}
+.an-th span{font-size:10px;font-weight:600;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.06em;}
+.an-tr{display:grid;padding:11px 14px;border-bottom:1px solid var(--rule);align-items:center;cursor:pointer;transition:background .1s;}
+.an-tr:last-child{border-bottom:none;}
+.an-tr:hover{background:var(--parch);}
+.gc-up{grid-template-columns:85px 1fr 90px 72px;}
+.gc-old{grid-template-columns:85px 1fr 90px 65px 55px;}
+.an-id{font-size:12px;font-weight:700;color:var(--slate);}
+.an-ttl{font-size:12px;color:var(--ink-mid);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.tag{display:inline-flex;align-items:center;padding:2px 7px;border-radius:100px;font-size:10px;font-weight:600;}
+.tag.High{background:var(--red-light);color:#991b1b;}
+.tag.Medium{background:var(--amber-bg);color:var(--amber);}
+.tag.Low{background:var(--green-bg);color:var(--green);}
+.tag.blue{background:#dbeafe;color:#1e3a5f;}
+.days-pill{font-size:11px;font-weight:600;padding:2px 8px;border-radius:100px;}
+.days-pill.urgent{background:var(--red-light);color:#991b1b;}
+.days-pill.soon{background:var(--amber-bg);color:var(--amber);}
+.days-pill.ok{background:var(--green-bg);color:var(--green);}
+.no-data{text-align:center;padding:2.5rem;color:var(--ink-muted);font-size:13px;}
+.an-load{text-align:center;padding:3rem 1rem;color:var(--ink-soft);}
+.an-load svg{width:28px;height:28px;stroke:var(--ink-muted);fill:none;stroke-width:1.5;animation:spin 1s linear infinite;margin:0 auto 10px;display:block;}
 
-  .field-note {
-    font-size: 11px;
-    color: var(--text-muted);
-    margin-top: 4px;
-  }
+/* TOAST */
+.toast{position:fixed;bottom:76px;left:50%;transform:translateX(-50%) translateY(16px);padding:12px 18px 12px 14px;border-radius:var(--r);font-size:13px;font-weight:500;max-width:92vw;z-index:9999;display:flex;align-items:center;gap:9px;box-shadow:var(--sh-lg);min-width:240px;opacity:0;transition:transform .3s cubic-bezier(.34,1.56,.64,1),opacity .3s;border-left:3px solid transparent;}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+.toast.success{background:var(--slate);color:#fff;border-left-color:var(--brass);}
+.toast.error{background:#7f1d1d;color:#fff;border-left-color:#fca5a5;}
+.toast svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;flex-shrink:0;}
 
-  .divider {
-    height: 1px;
-    background: var(--border);
-    margin: 1rem 0;
-  }
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--rule);display:flex;z-index:49;box-shadow:0 -2px 12px rgba(0,0,0,.07);}
+.bn-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 2px 7px;cursor:pointer;border:none;background:transparent;font-family:inherit;color:var(--ink-soft);transition:color .15s,transform .15s;position:relative;}
+.bn-item:active{transform:scale(.9);}
+.bn-item svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.8;transition:stroke-width .15s;}
+.bn-item span{font-size:9.5px;font-weight:500;}
+.bn-item.active{color:var(--slate);}
+.bn-item.active svg{stroke-width:2.3;}
+.bn-badge{position:absolute;top:7px;right:calc(50% - 16px);background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:100px;min-width:16px;text-align:center;animation:bounceIn .3s ease;}
 
-  .info-banner {
-    background: var(--warning-bg);
-    border: 1px solid #fcd34d;
-    border-radius: var(--radius-sm);
-    padding: 10px 12px;
-    font-size: 12px;
-    color: var(--warning);
-    margin-bottom: 1rem;
-    line-height: 1.5;
-  }
-
-  .config-note {
-    background: var(--accent-light);
-    border: 1px solid #c7d7ea;
-    border-radius: var(--radius-sm);
-    padding: 10px 12px;
-    font-size: 12px;
-    color: var(--accent);
-    margin-bottom: 1.25rem;
-    line-height: 1.5;
-  }
-
-  @media (max-width: 480px) {
-    .row-2 { grid-template-columns: 1fr; }
-    .container { padding: 1rem 0.75rem 4rem; }
-  }
+@media(max-width:520px){
+  .c2,.c3{grid-template-columns:1fr;}
+  .dc{grid-template-columns:1fr;}
+  .stat-g4{grid-template-columns:1fr 1fr;}
+  .chart-2col{grid-template-columns:1fr;}
+  .prio-row{grid-template-columns:repeat(3,1fr);}
+  .gc-old{grid-template-columns:75px 1fr 80px 55px;}
+  .brand-tag{display:none;}
+  .stats-row{grid-template-columns:repeat(2,1fr);}
+}
 </style>
 </head>
 <body>
 
-<header>
-  <div class="logo">⚖️</div>
-  <div>
-    <h1>Court Case Manager</h1>
-    <p>Jaipur District Court — Case Tracking</p>
-  </div>
-</header>
-
-<div class="container">
-
-  <div class="config-note" id="configBanner">
-    ⚙️ <strong>Setup required:</strong> Open this file and set <code>APPS_SCRIPT_URL</code> to your deployed Web App URL.
-  </div>
-
-  <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('register')">Register New Case</button>
-    <button class="tab-btn" onclick="switchTab('update')">Update Existing Case</button>
-  </div>
-
-  <!-- REGISTER PANEL -->
-  <div class="panel active" id="panel-register">
-    <div class="card">
-      <div class="card-title">Case Information</div>
-
-      <div class="field">
-        <label>Case ID <span class="req">*</span></label>
-        <input type="text" id="reg-caseId" placeholder="e.g. JDC-2024-001" autocomplete="off">
-      </div>
-
-      <div class="field">
-        <label>Party Name <span class="req">*</span></label>
-        <input type="text" id="reg-name" placeholder="Petitioner vs Respondent">
-      </div>
-
-      <div class="field">
-        <label>Case Description</label>
-        <textarea id="reg-desc" placeholder="Brief description of the case..."></textarea>
-      </div>
-
-      <div class="field">
-        <label>Assigned Lawyer</label>
-        <input type="text" id="reg-lawyer" placeholder="Advocate name">
-      </div>
+<!-- ══ HOME ══ -->
+<div class="screen active" id="home">
+  <header class="home-header">
+    <div class="brand">
+      <span class="brand-name">Lex<em>Track</em></span>
+      <span class="brand-tag">Jaipur District Court</span>
     </div>
+    <div class="header-date" id="todayDisplay"></div>
+  </header>
 
-    <div class="card">
-      <div class="card-title">First Hearing</div>
-
-      <div class="field">
-        <label>Status <span class="req">*</span></label>
-        <div class="status-toggle">
-          <div class="status-opt">
-            <input type="radio" name="reg-status" id="reg-ongoing" value="Ongoing" checked>
-            <label for="reg-ongoing">🟢 Ongoing</label>
-          </div>
-          <div class="status-opt closed">
-            <input type="radio" name="reg-status" id="reg-closed" value="Closed">
-            <label for="reg-closed">⚪ Closed</label>
-          </div>
-        </div>
-      </div>
-
-      <div class="next-date-section visible" id="reg-next-section">
-        <div class="field">
-          <label>Hearing Outcome <span class="hint">(optional)</span></label>
-          <input type="text" id="reg-outcome" placeholder="e.g. Adjourned, Arguments heard...">
-        </div>
-        <div class="row-2">
-          <div class="field">
-            <label>Next Date <span class="req">*</span></label>
-            <input type="date" id="reg-date">
-          </div>
-          <div class="field">
-            <label>Time</label>
-            <input type="time" id="reg-time" value="10:30">
-          </div>
-        </div>
-        <p class="field-note">A Google Calendar event will be created for this date.</p>
-      </div>
-    </div>
-
-    <button class="submit-btn" id="reg-btn" onclick="submitRegister()">
-      <span class="btn-text">Register Case &amp; Schedule Hearing</span>
-      <div class="spinner"></div>
-    </button>
+  <div class="hero">
+    <div class="hero-eyebrow">Case Management Dashboard</div>
+    <h1 class="hero-title">Your Court,<br>Under Control.</h1>
+    <p class="hero-sub">Track all cases, hearings, and deadlines — from one place.</p>
   </div>
 
-  <!-- UPDATE PANEL -->
-  <div class="panel" id="panel-update">
-    <div class="card">
-      <div class="card-title">Identify Case</div>
-      <div class="field">
-        <label>Case ID <span class="req">*</span></label>
-        <input type="text" id="upd-caseId" placeholder="Enter existing case ID" autocomplete="off">
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">Today's Hearing Update</div>
-
-      <div class="field">
-        <label>Today's Outcome <span class="req">*</span></label>
-        <input type="text" id="upd-outcome" placeholder="e.g. Arguments heard, Adjourned...">
-      </div>
-
-      <div class="field">
-        <label>Hearing Date <span class="hint">(today's date)</span></label>
-        <input type="date" id="upd-hearingDate">
-      </div>
-
-      <div class="divider"></div>
-
-      <div class="field">
-        <label>Status after today <span class="req">*</span></label>
-        <div class="status-toggle">
-          <div class="status-opt">
-            <input type="radio" name="upd-status" id="upd-ongoing" value="Ongoing" checked onchange="toggleNextDate('upd', true)">
-            <label for="upd-ongoing">🟢 Ongoing</label>
-          </div>
-          <div class="status-opt closed">
-            <input type="radio" name="upd-status" id="upd-closed" value="Closed" onchange="toggleNextDate('upd', false)">
-            <label for="upd-closed">⚪ Closed</label>
-          </div>
-        </div>
-      </div>
-
-      <div class="next-date-section visible" id="upd-next-section">
-        <div class="row-2">
-          <div class="field">
-            <label>Next Hearing Date <span class="req">*</span></label>
-            <input type="date" id="upd-nextDate">
-          </div>
-          <div class="field">
-            <label>Time</label>
-            <input type="time" id="upd-nextTime" value="10:30">
-          </div>
-        </div>
-        <p class="field-note">Old calendar event will be replaced with the new date.</p>
-      </div>
-    </div>
-
-    <button class="submit-btn" id="upd-btn" onclick="submitUpdate()">
-      <span class="btn-text">Save Update &amp; Reschedule</span>
-      <div class="spinner"></div>
-    </button>
+  <div class="stats-row" id="statsRow">
+    <div class="stat-item hi"><div class="stat-num" id="st-total">—</div><div class="stat-lbl">Total Cases</div></div>
+    <div class="stat-item"><div class="stat-num" id="st-ongoing">—</div><div class="stat-lbl">Ongoing</div></div>
+    <div class="stat-item danger"><div class="stat-num" id="st-overdue">—</div><div class="stat-lbl">Overdue</div></div>
+    <div class="stat-item"><div class="stat-num" id="st-today">—</div><div class="stat-lbl">Today</div></div>
   </div>
 
+  <div class="home-body">
+    <div class="sec-label"><div class="live-dot"></div>Upcoming Hearings</div>
+    <div class="docket-list" id="docketList"><div class="docket-empty skel" style="height:72px;border:none;"></div><div class="docket-empty skel" style="height:72px;border:none;margin-top:8px;"></div></div>
+
+    <div class="sec-label">Quick Actions</div>
+    <div class="action-grid">
+      <button class="action-btn primary ripple-wrap" onclick="goTo('register');addRipple(event,this)">
+        <div class="action-icon">⚖️</div>
+        <div><div class="action-btn-title">Register Case</div><div class="action-btn-desc">Open a new case file</div></div>
+      </button>
+      <button class="action-btn ripple-wrap" onclick="goTo('update');addRipple(event,this)">
+        <div class="action-icon">📋</div>
+        <div><div class="action-btn-title">Update Hearing</div><div class="action-btn-desc">Log today's outcome</div></div>
+      </button>
+      <button class="action-btn full ripple-wrap" onclick="goTo('analytics');addRipple(event,this)">
+        <div class="action-icon">📊</div>
+        <div><div class="action-btn-title">Analytics &amp; Reports</div><div class="action-btn-desc">Breakdown, case types, overdue cases</div></div>
+      </button>
+    </div>
+  </div>
+  <div style="height:64px"></div>
 </div>
 
-<div class="toast" id="toast"></div>
+<!-- ══ REGISTER ══ -->
+<div class="screen" id="register">
+  <header class="inner-header">
+    <button class="back-btn" onclick="goBack()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+    <div><div class="inner-title">Register New Case</div><div class="inner-subtitle">Open a new file</div></div>
+  </header>
+  <div class="progress-bar-wrap">
+    <div class="step active" id="rs1"><div class="step-num">1</div><div class="step-lbl">Case Info</div></div>
+    <div class="step-line"></div>
+    <div class="step" id="rs2"><div class="step-num">2</div><div class="step-lbl">Parties</div></div>
+    <div class="step-line"></div>
+    <div class="step" id="rs3"><div class="step-num">3</div><div class="step-lbl">Hearing</div></div>
+    <div class="step-line"></div>
+    <div class="step" id="rs4"><div class="step-num">4</div><div class="step-lbl">Documents</div></div>
+  </div>
+  <div class="form-container">
+    <div class="fc">
+      <div class="fch"><div class="fch-icon">🏛️</div><div><div class="fch-title">Case Identity</div><div class="fch-sub">Court reference and classification</div></div></div>
+      <div class="fcb">
+        <div class="field-row c2">
+          <div class="field"><label class="std">Internal Case ID <span class="req">*</span></label><input type="text" id="r-caseId" placeholder="e.g. JDC-2024-001"></div>
+          <div class="field"><label class="std">Court Case No. <span class="opt">(official)</span></label><input type="text" id="r-courtNo" placeholder="e.g. CS/123/2024"></div>
+        </div>
+        <div class="field-row c2">
+          <div class="field"><label class="std">Court Type <span class="req">*</span></label>
+            <select id="r-courtType"><option value="">— Select —</option><option>District Court</option><option>High Court</option><option>Family Court</option><option>Labour Court</option><option>Consumer Forum</option><option>Revenue Court</option><option>Magistrate Court</option><option>Sessions Court</option></select></div>
+          <div class="field"><label class="std">Case Type <span class="req">*</span></label>
+            <select id="r-caseType"><option value="">— Select —</option><option>Civil Suit</option><option>Criminal</option><option>Matrimonial / Divorce</option><option>Property Dispute</option><option>Cheque Bounce (138 NI)</option><option>Labour / Service</option><option>Writ Petition</option><option>Execution</option><option>Appeal</option><option>Injunction</option></select></div>
+        </div>
+        <div class="field"><label class="std">Case Title / Parties <span class="req">*</span></label><input type="text" id="r-name" placeholder="Petitioner Name vs Respondent Name"></div>
+        <div class="field"><label class="std">Brief Description</label><textarea id="r-desc" placeholder="Nature of dispute, key facts, reliefs sought..."></textarea></div>
+      </div>
+    </div>
+    <div class="fc">
+      <div class="fch"><div class="fch-icon">👥</div><div><div class="fch-title">Client &amp; Counsel</div><div class="fch-sub">Parties and representation</div></div></div>
+      <div class="fcb">
+        <div class="field-row c2">
+          <div class="field"><label class="std">Client Name <span class="req">*</span></label><input type="text" id="r-clientName" placeholder="Our client's full name"></div>
+          <div class="field"><label class="std">Client Phone <span class="opt">(optional)</span></label><input type="tel" id="r-clientPhone" placeholder="98XXXXXXXX"></div>
+        </div>
+        <div class="field-row c2">
+          <div class="field"><label class="std">Assigned Advocate <span class="req">*</span></label><input type="text" id="r-lawyer" placeholder="Advocate's name"></div>
+          <div class="field"><label class="std">Opposing Counsel <span class="opt">(if known)</span></label><input type="text" id="r-oppCounsel" placeholder="Opposing counsel name"></div>
+        </div>
+      </div>
+    </div>
+    <div class="fc">
+      <div class="fch"><div class="fch-icon">📅</div><div><div class="fch-title">Hearing &amp; Status</div><div class="fch-sub">Schedule the next hearing date</div></div></div>
+      <div class="fcb">
+        <div class="field"><label class="std">Priority</label>
+          <div class="pg">
+            <div class="po low"><input type="radio" name="r-prio" id="r-plow" value="Low"><label for="r-plow">🟢 Low</label></div>
+            <div class="po med"><input type="radio" name="r-prio" id="r-pmed" value="Medium" checked><label for="r-pmed">🟡 Medium</label></div>
+            <div class="po high"><input type="radio" name="r-prio" id="r-phigh" value="High"><label for="r-phigh">🔴 High</label></div>
+          </div>
+        </div>
+        <div class="field"><label class="std">Status <span class="req">*</span></label>
+          <div class="sg">
+            <div class="so ongoing"><input type="radio" name="r-status" id="r-ongoing" value="Ongoing" checked onchange="tn('r',true)"><label for="r-ongoing"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Ongoing</label></div>
+            <div class="so closed"><input type="radio" name="r-status" id="r-closed" value="Closed" onchange="tn('r',false)"><label for="r-closed"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Closed</label></div>
+          </div>
+        </div>
+        <div class="nhb open" id="r-nb">
+          <div class="inner">
+            <div class="field"><label class="std">Today's Outcome <span class="opt">(if first hearing already happened)</span></label><input type="text" id="r-outcome" placeholder="e.g. Admitted, Notice issued, Adjourned..."></div>
+            <div class="field-row c2">
+              <div class="field"><label class="std">Next Hearing Date <span class="req">*</span></label><input type="date" id="r-nextDate"></div>
+              <div class="field"><label class="std">Time</label><input type="time" id="r-nextTime" value="10:30"></div>
+            </div>
+            <p class="field-note"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>A Google Calendar event will be created automatically.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="fc">
+      <div class="fch"><div class="fch-icon">📄</div><div><div class="fch-title">Document Checklist</div><div class="fch-sub">Track what is ready</div></div></div>
+      <div class="fcb">
+        <div class="dc">
+          <label class="di"><input type="checkbox" id="doc-vak"><span class="di-lbl">Vakalatnama</span></label>
+          <label class="di"><input type="checkbox" id="doc-pla"><span class="di-lbl">Plaint / Petition</span></label>
+          <label class="di"><input type="checkbox" id="doc-aff"><span class="di-lbl">Affidavit</span></label>
+          <label class="di"><input type="checkbox" id="doc-evi"><span class="di-lbl">Evidence Documents</span></label>
+          <label class="di"><input type="checkbox" id="doc-idc"><span class="di-lbl">ID Proof (Client)</span></label>
+          <label class="di"><input type="checkbox" id="doc-ord"><span class="di-lbl">Previous Orders</span></label>
+          <label class="di"><input type="checkbox" id="doc-ntc"><span class="di-lbl">Legal Notice</span></label>
+          <label class="di"><input type="checkbox" id="doc-agr"><span class="di-lbl">Agreement / Contract</span></label>
+        </div>
+        <div class="field" style="margin-top:10px"><label class="std">Additional Notes</label><input type="text" id="r-docNotes" placeholder="Other pending documents..."></div>
+      </div>
+    </div>
+    <div style="height:100px"></div>
+  </div>
+  <div class="submit-zone"><div class="submit-zone-inner">
+    <button class="btn-primary" id="r-btn" onclick="submitRegister()">
+      <svg viewBox="0 0 24 24" class="btn-txt"><path d="M12 5v14M5 12h14"/></svg>
+      <span class="btn-txt">Register Case &amp; Schedule Hearing</span>
+      <div class="btn-spin"></div>
+    </button>
+  </div></div>
+</div>
+
+<!-- ══ UPDATE ══ -->
+<div class="screen" id="update">
+  <header class="inner-header">
+    <button class="back-btn" onclick="goBack()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+    <div><div class="inner-title">Update Hearing</div><div class="inner-subtitle">Log today's court outcome</div></div>
+  </header>
+  <div class="form-container">
+    <div class="fc">
+      <div class="fch"><div class="fch-icon">🔍</div><div><div class="fch-title">Case Lookup</div><div class="fch-sub">Find case by internal ID</div></div></div>
+      <div class="fcb">
+        <div class="field"><label class="std">Case ID <span class="req">*</span></label><input type="text" id="u-caseId" placeholder="e.g. JDC-2024-001"></div>
+      </div>
+    </div>
+    <div class="fc">
+      <div class="fch"><div class="fch-icon">⚖️</div><div><div class="fch-title">Today's Hearing</div><div class="fch-sub">What happened in court today</div></div></div>
+      <div class="fcb">
+        <div class="field-row c2">
+          <div class="field"><label class="std">Hearing Date <span class="req">*</span></label><input type="date" id="u-hearingDate"></div>
+          <div class="field"><label class="std">Stage of Case</label>
+            <select id="u-stage"><option value="">— Select —</option><option>Filing / Admission</option><option>Notice / Summons</option><option>Written Statement</option><option>Evidence / Framing of Issues</option><option>Arguments</option><option>Judgment Reserved</option><option>Judgment Pronounced</option><option>Execution</option></select></div>
+        </div>
+        <div class="field"><label class="std">Today's Outcome <span class="req">*</span></label><input type="text" id="u-outcome" placeholder="e.g. Adjourned on request, WS filed, Arguments heard..."></div>
+        <div class="field"><label class="std">Judge / Bench <span class="opt">(optional)</span></label><input type="text" id="u-judge" placeholder="e.g. Hon. Justice Sharma"></div>
+        <div class="field"><label class="std">Private Notes</label><textarea id="u-notes" placeholder="Office notes, strategy, client instructions..."></textarea></div>
+      </div>
+    </div>
+    <div class="fc">
+      <div class="fch"><div class="fch-icon">📅</div><div><div class="fch-title">Next Steps</div><div class="fch-sub">Next hearing date or close the case</div></div></div>
+      <div class="fcb">
+        <div class="field"><label class="std">Status after today <span class="req">*</span></label>
+          <div class="sg">
+            <div class="so ongoing"><input type="radio" name="u-status" id="u-ongoing" value="Ongoing" checked onchange="tn('u',true)"><label for="u-ongoing"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Ongoing</label></div>
+            <div class="so closed"><input type="radio" name="u-status" id="u-closed" value="Closed" onchange="tn('u',false)"><label for="u-closed"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Disposed</label></div>
+          </div>
+        </div>
+        <div class="nhb open" id="u-nb">
+          <div class="inner">
+            <div class="field-row c2">
+              <div class="field"><label class="std">Next Hearing Date <span class="req">*</span></label><input type="date" id="u-nextDate"></div>
+              <div class="field"><label class="std">Time</label><input type="time" id="u-nextTime" value="10:30"></div>
+            </div>
+            <p class="field-note"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>The previous calendar event will be replaced with the new date.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="height:100px"></div>
+  </div>
+  <div class="submit-zone"><div class="submit-zone-inner">
+    <button class="btn-primary" id="u-btn" onclick="submitUpdate()">
+      <svg viewBox="0 0 24 24" class="btn-txt"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v14a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+      <span class="btn-txt">Save Hearing Update</span>
+      <div class="btn-spin"></div>
+    </button>
+  </div></div>
+</div>
+
+<!-- ══ ALL CASES ══ -->
+<div class="screen" id="cases">
+  <header class="inner-header">
+    <button class="back-btn" onclick="goBack()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+    <div style="flex:1"><div class="inner-title">All Cases</div><div class="inner-subtitle">Sorted by Case ID</div></div>
+    <button class="refresh-btn" id="casesRefreshBtn" onclick="loadAllCases()">
+      <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Refresh
+    </button>
+  </header>
+  <div class="form-container" style="padding-top:1rem">
+    <div class="field" style="margin-bottom:1rem">
+      <input type="text" id="caseSearchInput" placeholder="Search by Case ID, client, or title..." oninput="filterCases()">
+    </div>
+    <div id="cases-list-content">
+      <div class="an-load" style="margin-top:2rem"><svg viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>Loading cases...</div>
+    </div>
+  </div>
+  <div style="height:64px"></div>
+</div>
+
+<!-- ══ CASE DETAIL ══ -->
+<div class="screen" id="caseDetail">
+  <header class="inner-header">
+    <button class="back-btn" onclick="goTo('cases')"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+    <div style="flex:1"><div class="inner-title" id="cd-title">Case Details</div><div class="inner-subtitle" id="cd-subtitle"></div></div>
+  </header>
+  <div class="form-container" id="caseDetailContent" style="padding-top:1rem"></div>
+  <div style="height:64px"></div>
+</div>
+<!-- ══ ANALYTICS ══ -->
+<div class="screen" id="analytics">
+  <header class="inner-header">
+    <button class="back-btn" onclick="goBack()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+    <div style="flex:1"><div class="inner-title">Analytics</div><div class="inner-subtitle">Live data from Google Sheet</div></div>
+    <button class="refresh-btn" id="refreshBtn" onclick="loadAnalytics()">
+      <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Refresh
+    </button>
+  </header>
+  <div id="analytics-content"><div class="an-load" style="margin-top:3rem"><svg viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>Loading analytics...</div></div>
+  <div style="height:64px"></div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav" id="bottomNav">
+  <button class="bn-item active" id="bn-home" onclick="goTo('home')">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span>
+  </button>
+  <button class="bn-item" id="bn-register" onclick="goTo('register')">
+    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg><span>Register</span>
+  </button>
+  <button class="bn-item" id="bn-update" onclick="goTo('update')">
+    <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg><span>Update</span>
+  </button>
+  <button class="bn-item" id="bn-cases" onclick="goTo('cases')">
+    <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h7"/></svg><span>Cases</span>
+  </button>
+  <button class="bn-item" id="bn-analytics" onclick="goTo('analytics')">
+    <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span>Analytics</span>
+    <span class="bn-badge" id="overdue-badge" style="display:none">0</span>
+  </button>
+</nav>
+
+<div class="toast" id="toast"><svg viewBox="0 0 24 24" id="toast-icon"></svg><span id="toast-msg"></span></div>
 
 <script>
-  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzWS9Hhy1Rf-PZH_03-EzF_fc4VtH2XTSKFLJvDvKVurX4Zkw4PJEJswcJ7nHGOlcNb/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx7tKiDr_Bb5GFwUjNIa42CidBEVGt0xvsd9lnSxAQaV4RUiAP3tg-0ESMIf56ohsvYhw/exec";
+const todayISO = new Date().toISOString().split('T')[0];
 
-  function switchTab(tab) {
-    document.querySelectorAll('.tab-btn').forEach((b, i) => {
-      b.classList.toggle('active', (i === 0 && tab === 'register') || (i === 1 && tab === 'update'));
-    });
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    document.getElementById('panel-' + tab).classList.add('active');
+// Init
+document.getElementById('todayDisplay').textContent = new Date().toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
+document.getElementById('u-hearingDate').value = todayISO;
+
+// ── RIPPLE ──
+function addRipple(e, el) {
+  const r = document.createElement('span');
+  const rect = el.getBoundingClientRect();
+  const size = Math.max(rect.width, rect.height);
+  r.className = 'ripple-el';
+  r.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px;`;
+  el.appendChild(r);
+  setTimeout(() => r.remove(), 600);
+}
+
+// ── NAVIGATION ──
+let _prevScreen = 'home';
+function goTo(screen) {
+  _prevScreen = document.querySelector('.screen.active').id;
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(screen);
+  el.classList.add('active');
+  el.classList.add('slide-in');
+  setTimeout(() => el.classList.remove('slide-in'), 350);
+  document.querySelectorAll('.bn-item').forEach(b => b.classList.remove('active'));
+  // caseDetail doesn't have its own nav item — keep "Cases" highlighted
+  const navId = screen === 'caseDetail' ? 'cases' : screen;
+  const bn = document.getElementById('bn-'+navId);
+  if (bn) bn.classList.add('active');
+  // Hide bottom nav on register/update screens (submit zone takes bottom)
+  const bottomNav = document.getElementById('bottomNav');
+  if (screen === 'register' || screen === 'update') {
+    bottomNav.style.display = 'none';
+  } else {
+    bottomNav.style.display = 'flex';
   }
+  window.scrollTo(0,0);
+  if (screen === 'analytics') loadAnalytics();
+  if (screen === 'home') loadHomeData();
+  if (screen === 'cases') loadAllCases();
+}
+function goBack() { goTo('home'); }
 
-  function toggleNextDate(prefix, show) {
-    const sec = document.getElementById(prefix + '-next-section');
-    sec.classList.toggle('visible', show);
+// ── FORM ──
+function tn(p, show) { document.getElementById(p+'-nb').classList.toggle('open', show); }
+
+function getDocs() {
+  return ['vak','pla','aff','evi','idc','ord','ntc','agr']
+    .filter(d => document.getElementById('doc-'+d).checked)
+    .map(d => document.getElementById('doc-'+d).parentElement.querySelector('.di-lbl').textContent);
+}
+
+// ── TOAST ──
+function toast(msg, type='success') {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  document.getElementById('toast-icon').innerHTML = type==='error'
+    ? '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>'
+    : '<polyline points="20 6 9 17 4 12"/>';
+  t.className = 'toast '+type;
+  requestAnimationFrame(() => t.classList.add('show'));
+  setTimeout(() => t.classList.remove('show'), 4500);
+}
+
+function setLoad(id, s) { const b=document.getElementById(id); b.disabled=s; b.classList.toggle('loading',s); }
+
+function req(checks) {
+  for (const [id,lbl] of checks) {
+    const el = document.getElementById(id);
+    if (!el || !el.value.trim()) {
+      if (el) { el.focus(); el.classList.add('error'); setTimeout(()=>el.classList.remove('error'),600); }
+      toast(lbl + ' is required.', 'error'); return false;
+    }
   }
+  return true;
+}
 
-  document.querySelectorAll('input[name="reg-status"]').forEach(r => {
-    r.addEventListener('change', () => toggleNextDate('reg', r.value === 'Ongoing'));
+async function post(payload) {
+  const res = await fetch(APPS_SCRIPT_URL, {method:'POST', body:JSON.stringify(payload)});
+  const txt = await res.text();
+  let d; try { d=JSON.parse(txt); } catch { d={status:'ok'}; }
+  if (d && d.error) throw new Error(d.error);
+  return d;
+}
+
+// ── REGISTER ──
+async function submitRegister() {
+  const status = document.querySelector('input[name="r-status"]:checked').value;
+  const checks = [['r-caseId','Case ID'],['r-name','Case title'],['r-courtType','Court type'],['r-caseType','Case type'],['r-clientName','Client name'],['r-lawyer','Advocate name']];
+  if (status==='Ongoing') checks.push(['r-nextDate','Next hearing date']);
+  if (!req(checks)) return;
+  setLoad('r-btn',true);
+  try {
+    await post({action:'register',caseId:document.getElementById('r-caseId').value.trim(),courtNo:document.getElementById('r-courtNo').value.trim(),courtType:document.getElementById('r-courtType').value,caseType:document.getElementById('r-caseType').value,name:document.getElementById('r-name').value.trim(),description:document.getElementById('r-desc').value.trim(),clientName:document.getElementById('r-clientName').value.trim(),clientPhone:document.getElementById('r-clientPhone').value.trim(),lawyer:document.getElementById('r-lawyer').value.trim(),oppCounsel:document.getElementById('r-oppCounsel').value.trim(),priority:document.querySelector('input[name="r-prio"]:checked').value,status,outcome:document.getElementById('r-outcome').value.trim(),nextDate:document.getElementById('r-nextDate').value,nextTime:document.getElementById('r-nextTime').value,documents:getDocs().join(', '),docNotes:document.getElementById('r-docNotes').value.trim()});
+    toast('Case registered! Calendar event created.','success');
+    document.querySelectorAll('#register input:not([type=radio]):not([type=checkbox]),#register textarea,#register select').forEach(el=>el.value='');
+    document.getElementById('r-ongoing').checked=true; tn('r',true);
+    document.querySelectorAll('.di input[type=checkbox]').forEach(c=>c.checked=false);
+    document.getElementById('r-pmed').checked=true;
+    setTimeout(()=>goTo('home'),1600);
+  } catch(err) { toast(err.message||'Network error. Please try again.','error'); }
+  setLoad('r-btn',false);
+}
+
+// ── UPDATE ──
+async function submitUpdate() {
+  const status = document.querySelector('input[name="u-status"]:checked').value;
+  const checks = [['u-caseId','Case ID'],['u-outcome','Today\'s outcome'],['u-hearingDate','Hearing date']];
+  if (status==='Ongoing') checks.push(['u-nextDate','Next hearing date']);
+  if (!req(checks)) return;
+  setLoad('u-btn',true);
+  try {
+    await post({action:'update',caseId:document.getElementById('u-caseId').value.trim(),hearingDate:document.getElementById('u-hearingDate').value,stage:document.getElementById('u-stage').value,outcome:document.getElementById('u-outcome').value.trim(),judge:document.getElementById('u-judge').value.trim(),notes:document.getElementById('u-notes').value.trim(),status,nextDate:document.getElementById('u-nextDate').value,nextTime:document.getElementById('u-nextTime').value});
+    toast('Hearing saved! Calendar updated.','success');
+    ['u-caseId','u-outcome','u-judge','u-notes','u-nextDate'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('u-stage').value='';
+    document.getElementById('u-hearingDate').value=todayISO;
+    document.getElementById('u-ongoing').checked=true; tn('u',true);
+    setTimeout(()=>goTo('home'),1600);
+  } catch(err) { toast(err.message||'Network error. Please try again.','error'); }
+  setLoad('u-btn',false);
+}
+
+// ── PREFILL UPDATE (from overdue click) ──
+function prefillUpdate(caseId, lastDate) {
+  document.getElementById('u-caseId').value = caseId;
+  if (lastDate) document.getElementById('u-hearingDate').value = lastDate;
+  goTo('update');
+  setTimeout(()=>{ const el=document.getElementById('u-outcome'); if(el) el.focus(); },400);
+}
+
+// ── HOME DATA ──
+let _homeData = null;
+async function loadHomeData() {
+  try {
+    const res = await fetch(APPS_SCRIPT_URL + '?action=analytics');
+    const data = await res.json();
+    if (data.error) return;
+    _homeData = data;
+    const s = data.summary;
+    animNum('st-total', s.total||0);
+    animNum('st-ongoing', s.ongoing||0);
+    animNum('st-overdue', s.overdue||0);
+    const todayCount = (data.upcomingHearings||[]).filter(h=>h.daysLeft===0).length;
+    animNum('st-today', todayCount);
+    // Badge
+    const badge = document.getElementById('overdue-badge');
+    if (s.overdue > 0) { badge.textContent = s.overdue; badge.style.display='block'; }
+    else badge.style.display='none';
+    renderDocket(data.upcomingHearings||[], data.overdueList||[]);
+  } catch(e) {
+    document.getElementById('docketList').innerHTML = '<div class="docket-empty">Could not connect to sheet. Check setup.</div>';
+  }
+}
+
+function animNum(id, target) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  let start = 0, dur = 600, startTime = null;
+  function step(ts) {
+    if (!startTime) startTime = ts;
+    const prog = Math.min((ts-startTime)/dur, 1);
+    el.textContent = Math.floor(prog * target);
+    if (prog < 1) requestAnimationFrame(step);
+    else el.textContent = target;
+  }
+  requestAnimationFrame(step);
+}
+
+function renderDocket(upcoming, overdue) {
+  const el = document.getElementById('docketList');
+  let html = '';
+  // Show overdue first (max 2), then upcoming (max 4)
+  const overdueShow = (overdue||[]).slice(0,2);
+  const upcomingShow = (upcoming||[]).slice(0,4);
+
+  overdueShow.forEach((c,i) => {
+    const d = new Date(c.lastDateRaw||c.lastDate);
+    const day = isNaN(d)?'?':d.getDate();
+    const mon = isNaN(d)?'':d.toLocaleString('en-IN',{month:'short'}).toUpperCase();
+    html += `<div class="docket-card overdue-card" style="animation-delay:${i*0.07}s" onclick="prefillUpdate('${esc(c.caseId)}','${esc(c.lastDateRaw||'')}')">
+      <div class="docket-date-block" style="background:#fef2f2;border-color:#fca5a5"><div class="docket-day" style="color:#dc2626">${day}</div><div class="docket-mon" style="color:#dc2626">${mon}</div></div>
+      <div class="docket-info">
+        <div class="docket-id" style="color:#dc2626">⚠ ${esc(c.caseId)} — Overdue</div>
+        <div class="docket-title">${esc(c.title)||'—'}</div>
+        <div class="docket-meta">${esc(c.caseType)} · ${c.overdueBy}d since last scheduled date</div>
+      </div>
+      <span class="prio-badge High">Update Now</span>
+      <span class="docket-arrow">›</span>
+    </div>`;
   });
 
-  function setToday() {
-    const today = new Date().toISOString().split('T')[0];
-    const updHearing = document.getElementById('upd-hearingDate');
-    if (updHearing) updHearing.value = today;
-  }
-  setToday();
+  upcomingShow.forEach((c,i) => {
+    const d = new Date(c.nextDate);
+    const day = isNaN(d)?'—':d.getDate();
+    const mon = isNaN(d)?'':d.toLocaleString('en-IN',{month:'short'}).toUpperCase();
+    html += `<div class="docket-card" style="animation-delay:${(overdueShow.length+i)*0.07}s" onclick="prefillUpdate('${esc(c.caseId)}','${todayISO}')">
+      <div class="docket-date-block"><div class="docket-day">${day}</div><div class="docket-mon">${mon}</div></div>
+      <div class="docket-info">
+        <div class="docket-id">${esc(c.caseId)}</div>
+        <div class="docket-title">${esc(c.title)||'—'}</div>
+        <div class="docket-meta">${esc(c.caseType)} · ${c.daysLeft===0?'<b style="color:#dc2626">Today</b>':c.daysLeft+'d away'}</div>
+      </div>
+      <span class="prio-badge ${esc(c.priority)}">${esc(c.priority)}</span>
+      <span class="docket-arrow">›</span>
+    </div>`;
+  });
 
-  function showToast(msg, type = '') {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.className = 'toast ' + type;
-    requestAnimationFrame(() => t.classList.add('show'));
-    setTimeout(() => t.classList.remove('show'), 4000);
-  }
+  if (!html) html = '<div class="docket-empty">No upcoming hearings in the next 30 days.</div>';
+  el.innerHTML = html;
+}
 
-  function setLoading(btnId, loading) {
-    const btn = document.getElementById(btnId);
-    btn.disabled = loading;
-    btn.classList.toggle('loading', loading);
-  }
-
-  function validate(fields) {
-    for (const [id, label] of fields) {
-      const el = document.getElementById(id);
-      if (!el || !el.value.trim()) {
-        el && el.focus();
-        showToast(label + ' is required', 'error');
-        return false;
-      }
-    }
-    return true;
-  }
-
-  async function postToScript(payload) {
-    if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === "YOUR_APPS_SCRIPT_WEB_APP_URL_HERE") {
-      throw new Error("Apps Script URL not configured. Please update APPS_SCRIPT_URL in this file.");
-    }
-    const res = await fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      body: JSON.stringify(payload)
-    });
-    const text = await res.text();
-    let data;
-    try { data = JSON.parse(text); } catch { data = { status: 'ok' }; }
+// ── ANALYTICS ──
+async function loadAnalytics() {
+  document.getElementById('analytics-content').innerHTML = '<div class="an-load" style="margin-top:3rem"><svg viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>Loading analytics...</div>';
+  const btn = document.getElementById('refreshBtn');
+  btn.classList.add('spinning');
+  try {
+    const res = await fetch(APPS_SCRIPT_URL + '?action=analytics');
+    const data = await res.json();
     if (data.error) throw new Error(data.error);
-    return data;
+    _homeData = data;
+    renderAnalytics(data);
+  } catch(err) {
+    document.getElementById('analytics-content').innerHTML = '<div class="no-data" style="margin-top:3rem">❌ '+esc(err.message||'Load failed')+'<br><small style="display:block;margin-top:8px">Have you run setupSheet() in Apps Script?</small></div>';
   }
+  btn.classList.remove('spinning');
+}
 
-  async function submitRegister() {
-    const status = document.querySelector('input[name="reg-status"]:checked').value;
-    const isOngoing = status === 'Ongoing';
+function renderAnalytics(d) {
+  const s = d.summary;
+  const overdue = d.overdueList||[];
+  const ph=(d.priorityBreakdown||[]).find(p=>p.label==='High')||{count:0};
+  const pm=(d.priorityBreakdown||[]).find(p=>p.label==='Medium')||{count:0};
+  const pl=(d.priorityBreakdown||[]).find(p=>p.label==='Low')||{count:0};
 
-    const required = [['reg-caseId', 'Case ID'], ['reg-name', 'Party name']];
-    if (isOngoing) required.push(['reg-date', 'Next hearing date']);
-    if (!validate(required)) return;
+  let html = `<div class="an-hero">
+    <div class="an-hero-top">
+      <div><div class="an-hero-title">Case Overview</div><div class="an-hero-sub">Updated ${new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}</div></div>
+    </div></div><div class="an-body">`;
 
-    setLoading('reg-btn', true);
-    try {
-      await postToScript({
-        action: 'register',
-        caseId: document.getElementById('reg-caseId').value.trim(),
-        name: document.getElementById('reg-name').value.trim(),
-        description: document.getElementById('reg-desc').value.trim(),
-        lawyer: document.getElementById('reg-lawyer').value.trim(),
-        outcome: document.getElementById('reg-outcome').value.trim(),
-        status: status,
-        nextDate: document.getElementById('reg-date').value,
-        nextTime: document.getElementById('reg-time').value
+  // Summary
+  html += `<div class="stat-g4">
+    <div class="stat-card"><div class="stat-card-val">${s.total}</div><div class="stat-card-lbl">Total Cases</div></div>
+    <div class="stat-card warn"><div class="stat-card-val">${s.ongoing}</div><div class="stat-card-lbl">Ongoing</div></div>
+    <div class="stat-card ok"><div class="stat-card-val">${s.closed}</div><div class="stat-card-lbl">Closed</div></div>
+    <div class="stat-card ${s.overdue>0?'danger':'brass'}"><div class="stat-card-val">${s.overdue||0}</div><div class="stat-card-lbl">Overdue</div></div>
+  </div>`;
+
+  // ── OVERDUE / YET TO UPDATE ──
+  html += `<div class="an-sec"><div class="an-sec-title">Yet to Update <span class="an-sec-badge">${overdue.length} pending</span></div>`;
+  if (!overdue.length) {
+    html += '<div class="an-table"><div class="no-data">✅ All caught up! No overdue cases.</div></div>';
+  } else {
+    html += `<div class="overdue-banner"><div class="overdue-icon">⚠️</div><div><div class="overdue-banner-title">${overdue.length} case${overdue.length>1?'s':''} need${overdue.length===1?'s':''} to be updated</div><div class="overdue-banner-sub">Click any case below to log the hearing outcome.</div></div></div>`;
+    html += '<div style="display:flex;flex-direction:column;gap:8px;">';
+    overdue.forEach((c,i) => {
+      const d = new Date(c.lastDateRaw||c.lastDate);
+      const day = isNaN(d)?'?':d.getDate();
+      const mon = isNaN(d)?'':d.toLocaleString('en-IN',{month:'short'}).toUpperCase();
+      html += `<div class="overdue-card" style="animation-delay:${i*0.06}s" onclick="prefillUpdate('${esc(c.caseId)}','${esc(c.lastDateRaw||'')}')">
+        <div class="overdue-date-block"><div class="overdue-date-day">${day}</div><div class="overdue-date-mon">${mon}</div></div>
+        <div class="overdue-info">
+          <div class="overdue-case-id">⚠ ${esc(c.caseId)}</div>
+          <div class="overdue-title">${esc(c.title)||'—'}</div>
+          <div class="overdue-meta">${esc(c.caseType)} · Scheduled: ${esc(c.lastDate)}</div>
+        </div>
+        <span class="tag ${esc(c.priority)}">${esc(c.priority)}</span>
+        <span class="overdue-days">${c.overdueBy}d overdue</span>
+        <span class="overdue-arrow">›</span>
+      </div>`;
+    });
+    html += '</div>';
+  }
+  html += '</div>';
+
+  // Priority
+  html += `<div class="an-sec"><div class="an-sec-title">Priority Breakdown</div>
+    <div class="prio-row">
+      <div class="prio-card high"><div class="prio-val">${ph.count}</div><div class="prio-lbl">🔴 High</div></div>
+      <div class="prio-card med"><div class="prio-val">${pm.count}</div><div class="prio-lbl">🟡 Medium</div></div>
+      <div class="prio-card low"><div class="prio-val">${pl.count}</div><div class="prio-lbl">🟢 Low</div></div>
+    </div></div>`;
+
+  // Charts
+  html += `<div class="an-sec"><div class="an-sec-title">Case Breakdown</div>
+    <div class="chart-2col">${buildBar('Case Type',d.caseTypeBreakdown,'')}${buildBar('Court Type',d.courtTypeBreakdown,'brass')}</div></div>`;
+
+  // Upcoming
+  html += `<div class="an-sec"><div class="an-sec-title">Upcoming Hearings</div>`;
+  if (!d.upcomingHearings||!d.upcomingHearings.length) {
+    html += '<div class="an-table"><div class="no-data">No upcoming hearings in the next 30 days.</div></div>';
+  } else {
+    html += '<div class="an-table"><div class="an-th gc-up"><span>Case ID</span><span>Title</span><span>Date</span><span>Days Left</span></div>';
+    d.upcomingHearings.forEach(c=>{
+      const pc=c.daysLeft<=2?'urgent':c.daysLeft<=7?'soon':'ok';
+      const dt=c.daysLeft===0?'Today!':c.daysLeft+'d';
+      html+=`<div class="an-tr gc-up" onclick="prefillUpdate('${esc(c.caseId)}','${todayISO}')"><span class="an-id">${esc(c.caseId)}</span><span class="an-ttl">${esc(c.title)||'—'}</span><span style="font-size:12px;color:var(--ink-soft)">${esc(c.nextDate)}</span><span><span class="days-pill ${pc}">${dt}</span></span></div>`;
+    });
+    html += '</div>';
+  }
+  html += '</div>';
+
+  // Oldest
+  html += `<div class="an-sec"><div class="an-sec-title">Oldest Ongoing Cases</div>`;
+  if (!d.oldestCases||!d.oldestCases.length) {
+    html += '<div class="an-table"><div class="no-data">No ongoing cases.</div></div>';
+  } else {
+    html += '<div class="an-table"><div class="an-th gc-old"><span>Case ID</span><span>Title</span><span>Type</span><span>Priority</span><span>Age</span></div>';
+    d.oldestCases.forEach(c=>{
+      const mo=Math.floor(c.days/30);
+      const dur=mo>=12?Math.floor(mo/12)+'y '+(mo%12)+'m':mo>0?mo+'m':c.days+'d';
+      html+=`<div class="an-tr gc-old" onclick="prefillUpdate('${esc(c.caseId)}','${todayISO}')"><span class="an-id">${esc(c.caseId)}</span><span class="an-ttl">${esc(c.title)||'—'}</span><span><span class="tag blue">${esc(c.caseType)}</span></span><span><span class="tag ${esc(c.priority)}">${esc(c.priority)}</span></span><span style="font-size:12px;font-weight:600;color:var(--slate)">${dur}</span></div>`;
+    });
+    html += '</div>';
+  }
+  html += '</div></div>';
+  document.getElementById('analytics-content').innerHTML = html;
+}
+
+function buildBar(title, items, cls) {
+  const max = items&&items.length?Math.max(...items.map(i=>i.count)):1;
+  let h=`<div class="chart-card"><div class="chart-title">${title}</div>`;
+  if (!items||!items.length) h+='<div style="font-size:12px;color:var(--ink-muted)">No data yet.</div>';
+  else items.slice(0,5).forEach(item=>{
+    const w=Math.round(item.count/max*100);
+    h+=`<div class="bar-row"><span class="bar-lbl" title="${esc(item.label)}">${esc(item.label)}</span><div class="bar-track"><div class="bar-fill ${cls}" style="width:${w}%"></div></div><span class="bar-cnt">${item.count}</span></div>`;
+  });
+  return h+'</div>';
+}
+
+function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ── ALL CASES ──
+let _allCases = [];
+async function loadAllCases() {
+  document.getElementById('cases-list-content').innerHTML = '<div class="an-load" style="margin-top:2rem"><svg viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>Loading cases...</div>';
+  const btn = document.getElementById('casesRefreshBtn');
+  btn.classList.add('spinning');
+  try {
+    const res = await fetch(APPS_SCRIPT_URL + '?action=allcases');
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    _allCases = data.cases || [];
+    renderCasesList(_allCases);
+  } catch(err) {
+    document.getElementById('cases-list-content').innerHTML = '<div class="no-data" style="margin-top:2rem">❌ '+esc(err.message||'Load failed')+'</div>';
+  }
+  btn.classList.remove('spinning');
+}
+
+function renderCasesList(list) {
+  const el = document.getElementById('cases-list-content');
+  if (!list.length) { el.innerHTML = '<div class="docket-empty">No cases found. Register your first case to get started.</div>'; return; }
+  el.innerHTML = list.map((c,i) => {
+    const initial = (c.clientName || c.title || c.caseId || '?').trim().charAt(0).toUpperCase();
+    const isClosed = (c.status||'').toLowerCase()==='closed';
+    return `<div class="case-list-card" style="animation-delay:${Math.min(i*0.04,0.4)}s" onclick="showCaseDetail('${esc(c.caseId)}')">
+      <div class="case-list-avatar ${isClosed?'closed':''}">${esc(initial)}</div>
+      <div class="case-list-info">
+        <div class="case-list-id">${esc(c.caseId)}</div>
+        <div class="case-list-client">${esc(c.clientName)||'—'}</div>
+        <div class="case-list-title">${esc(c.title)||'—'}</div>
+        <div class="case-list-meta">
+          <span class="status-pill ${esc(c.status)}">${esc(c.status)}</span>
+          <span class="tag ${esc(c.priority)}">${esc(c.priority)}</span>
+        </div>
+      </div>
+      <span class="case-list-arrow">›</span>
+    </div>`;
+  }).join('');
+}
+
+function filterCases() {
+  const q = document.getElementById('caseSearchInput').value.trim().toLowerCase();
+  if (!q) { renderCasesList(_allCases); return; }
+  const filtered = _allCases.filter(c =>
+    (c.caseId||'').toLowerCase().includes(q) ||
+    (c.clientName||'').toLowerCase().includes(q) ||
+    (c.title||'').toLowerCase().includes(q) ||
+    (c.courtCaseNo||'').toLowerCase().includes(q)
+  );
+  renderCasesList(filtered);
+}
+
+// ── CASE DETAIL ──
+function showCaseDetail(caseId) {
+  const c = _allCases.find(x => x.caseId === caseId);
+  if (!c) return;
+
+  document.getElementById('cd-title').textContent = c.caseId;
+  document.getElementById('cd-subtitle').textContent = c.clientName || c.title || '';
+
+  const isClosed = (c.status||'').toLowerCase()==='closed';
+
+  let html = `<div class="cd-hero">
+    <div class="cd-hero-top">
+      <div>
+        <div class="cd-hero-id">${esc(c.caseId)}${c.courtCaseNo?' · '+esc(c.courtCaseNo):''}</div>
+        <div class="cd-hero-title">${esc(c.title)||'Untitled Case'}</div>
+        <div class="cd-hero-tags">
+          <span class="cd-tag">${esc(c.courtType)||'—'}</span>
+          <span class="cd-tag">${esc(c.caseType)||'—'}</span>
+          <span class="cd-tag" style="background:${isClosed?'rgba(255,255,255,.12)':'rgba(34,197,94,.2)'};color:${isClosed?'rgba(255,255,255,.7)':'#86efac'}">${esc(c.status)}</span>
+          <span class="cd-tag">${esc(c.priority)} Priority</span>
+        </div>
+      </div>
+    </div>
+  </div>`;
+
+  // Info grid
+  html += `<div class="cd-grid">
+    <div class="cd-info-card"><div class="cd-info-lbl">Client</div><div class="cd-info-val">${esc(c.clientName)||'—'}</div></div>
+    <div class="cd-info-card"><div class="cd-info-lbl">Client Phone</div><div class="cd-info-val">${esc(c.clientPhone)||'—'}</div></div>
+    <div class="cd-info-card"><div class="cd-info-lbl">Advocate</div><div class="cd-info-val">${esc(c.lawyer)||'—'}</div></div>
+    <div class="cd-info-card"><div class="cd-info-lbl">Opposing Counsel</div><div class="cd-info-val">${esc(c.oppCounsel)||'—'}</div></div>
+    <div class="cd-info-card"><div class="cd-info-lbl">Registered On</div><div class="cd-info-val">${esc(c.registeredOn)||'—'}</div></div>
+    <div class="cd-info-card"><div class="cd-info-lbl">${isClosed?'Closed On':'Next Hearing'}</div><div class="cd-info-val">${isClosed ? (esc(c.closedOn)||'—') : (esc(c.nextHearingDate)||'—') + (c.nextHearingTime && !isClosed ? ' · '+esc(c.nextHearingTime):'')}</div></div>`;
+  if (c.description) {
+    html += `<div class="cd-info-card full"><div class="cd-info-lbl">Description</div><div class="cd-info-val" style="font-weight:400;font-size:12.5px;line-height:1.5">${esc(c.description)}</div></div>`;
+  }
+  html += `</div>`;
+
+  // Documents
+  if (c.documents) {
+    const docs = c.documents.split(',').map(d=>d.trim()).filter(Boolean);
+    if (docs.length) {
+      html += `<div class="an-sec-title" style="font-size:14px;margin-bottom:8px">Documents Ready</div><div class="cd-docs">`;
+      docs.forEach(d => {
+        html += `<span class="cd-doc-tag"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>${esc(d)}</span>`;
       });
-      showToast('Case registered successfully! Calendar event created.', 'success');
-      document.querySelectorAll('#panel-register input, #panel-register textarea').forEach(el => {
-        if (el.type !== 'radio') el.value = '';
-      });
-      document.getElementById('reg-ongoing').checked = true;
-      toggleNextDate('reg', true);
-    } catch (err) {
-      showToast(err.message || 'Something went wrong. Try again.', 'error');
+      html += `</div>`;
     }
-    setLoading('reg-btn', false);
+  }
+  if (c.docNotes) {
+    html += `<div class="cd-info-card full" style="margin-bottom:1rem"><div class="cd-info-lbl">Document Notes</div><div class="cd-info-val" style="font-weight:400;font-size:12.5px">${esc(c.docNotes)}</div></div>`;
   }
 
-  async function submitUpdate() {
-    const status = document.querySelector('input[name="upd-status"]:checked').value;
-    const isOngoing = status === 'Ongoing';
-
-    const required = [['upd-caseId', 'Case ID'], ['upd-outcome', "Today's outcome"]];
-    if (isOngoing) required.push(['upd-nextDate', 'Next hearing date']);
-    if (!validate(required)) return;
-
-    setLoading('upd-btn', true);
-    try {
-      await postToScript({
-        action: 'update',
-        caseId: document.getElementById('upd-caseId').value.trim(),
-        outcome: document.getElementById('upd-outcome').value.trim(),
-        hearingDate: document.getElementById('upd-hearingDate').value,
-        status: status,
-        nextDate: document.getElementById('upd-nextDate').value,
-        nextTime: document.getElementById('upd-nextTime').value
-      });
-      showToast('Case updated! Calendar rescheduled.', 'success');
-      document.querySelectorAll('#panel-update input').forEach(el => {
-        if (el.type !== 'radio') el.value = '';
-      });
-      document.getElementById('upd-ongoing').checked = true;
-      toggleNextDate('upd', true);
-      setToday();
-    } catch (err) {
-      showToast(err.message || 'Something went wrong. Try again.', 'error');
-    }
-    setLoading('upd-btn', false);
+  // Update button
+  if (!isClosed) {
+    html += `<button class="cd-update-btn" onclick="prefillUpdate('${esc(c.caseId)}','${todayISO}')">
+      <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v14a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+      Update This Hearing
+    </button>`;
   }
 
-  if (APPS_SCRIPT_URL && APPS_SCRIPT_URL !== "YOUR_APPS_SCRIPT_WEB_APP_URL_HERE") {
-    document.getElementById('configBanner').style.display = 'none';
+  // Timeline
+  html += `<div class="an-sec-title" style="font-size:15px;margin-bottom:.75rem">Hearing History</div>`;
+  if (!c.history || !c.history.length) {
+    html += '<div class="an-table"><div class="no-data">No hearing history recorded yet.</div></div>';
+  } else {
+    html += '<div class="cd-timeline">';
+    c.history.forEach(h => {
+      html += `<div class="cd-timeline-item">
+        <div class="cd-timeline-dot"></div>
+        <div class="cd-timeline-card">
+          <div class="cd-timeline-date">${esc(h.hearingDate)||'—'}</div>
+          ${h.stage ? `<div class="cd-timeline-stage">${esc(h.stage)}</div>` : ''}
+          <div class="cd-timeline-outcome">${esc(h.outcome)||'—'}</div>
+          ${(h.judge||h.notes) ? `<div class="cd-timeline-meta">${h.judge?`<span>Judge/Bench: ${esc(h.judge)}</span>`:''}${h.notes?`<span>Note: ${esc(h.notes)}</span>`:''}</div>` : ''}
+          ${h.nextDate ? `<div class="cd-timeline-next"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Next: ${esc(h.nextDate)}${h.nextTime?' · '+esc(h.nextTime):''}</div>` : ''}
+        </div>
+      </div>`;
+    });
+    html += '</div>';
   }
+
+  document.getElementById('caseDetailContent').innerHTML = html;
+  goTo('caseDetail');
+}
+
+// Start
+loadHomeData();
+
 </script>
 </body>
 </html>
